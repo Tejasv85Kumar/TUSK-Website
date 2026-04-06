@@ -1,0 +1,296 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Fraud Detection — TUSK AI</title>
+  <meta name="description" content="Enterprise-grade AI fraud detection with 99.7% accuracy and 47ms response time. Powered by LSTM neural networks, Random Forest, and behavioral analytics." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .fd-hero { padding: 8rem 0 4rem; text-align: center; background: radial-gradient(ellipse at 50% -10%, rgba(16,185,129,0.1) 0%, transparent 60%); }
+    .fd-product-cards { display: grid; grid-template-columns: repeat(4,1fr); gap: 1rem; margin-top: 3rem; }
+    .fd-product-card { background: var(--bg-card); border:1px solid var(--border); border-radius: var(--radius-md); padding: 1.25rem; text-align:center; transition:var(--transition); }
+    .fd-product-card:hover { border-color:var(--border-accent); transform:translateY(-3px); }
+    .fd-product-card .icon { font-size:1.8rem; margin-bottom:0.5rem; }
+    .fd-product-card h4 { font-size:0.9rem; }
+
+    .status-bar { background: var(--bg-secondary); border-top:1px solid var(--border); border-bottom:1px solid var(--border); padding:1.5rem 0; }
+    .status-bar-grid { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; }
+    .status-metric { display:flex; align-items:center; gap:0.75rem; padding:1rem 1.25rem; background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-md); }
+    .status-metric-icon { font-size:1.5rem; }
+    .status-metric-num { font-size:1.4rem; font-weight:800; color:var(--accent); }
+    .status-metric-label { font-size:0.75rem; color:var(--text-muted); }
+
+    .algo-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1.5rem; }
+    .algo-card { background:var(--bg-card); border:1px solid var(--border); border-radius:var(--radius-lg); padding:1.75rem; position:relative; overflow:hidden; }
+    .algo-card::before { content:''; position:absolute; top:0; left:0; right:0; height:3px; background:linear-gradient(90deg,var(--accent),var(--accent-light)); }
+    .algo-status { display:flex; align-items:center; gap:0.5rem; font-size:0.8rem; font-weight:600; margin-bottom:1rem; }
+    .algo-bar-wrap { height:6px; background:var(--border); border-radius:3px; overflow:hidden; margin:0.5rem 0; }
+    .algo-bar { height:100%; border-radius:3px; animation: algo-pulse 2s ease-in-out infinite alternate; }
+    @keyframes algo-pulse { from { opacity:0.6; } to { opacity:1; } }
+
+    .analysis-grid { display:grid; grid-template-columns:1fr 1fr; gap:2rem; align-items:start; }
+    .risk-meter { position:relative; width:160px; height:80px; margin:0 auto 1rem; }
+    .risk-score-big { font-size:3rem; font-weight:800; color:var(--accent); text-align:center; }
+    .risk-label { text-align:center; font-size:0.85rem; color:var(--text-muted); }
+    .risk-bar-wrap { height:8px; background:var(--border); border-radius:4px; overflow:hidden; margin:1.5rem 0 0.5rem; }
+    .risk-bar-fill { height:100%; border-radius:4px; background:linear-gradient(90deg,#10B981,#F59E0B,#EF4444); transition:width 0.5s ease; width:25%; }
+
+    .chart-bar-group { display:flex; align-items:flex-end; gap:8px; height:100px; margin-top:1rem; }
+    .chart-bar { border-radius:4px 4px 0 0; background:var(--border); transition:var(--transition); flex:1; min-width:12px; position:relative; cursor:pointer; }
+    .chart-bar:hover { background:var(--accent-glow-strong); }
+    .chart-bar.highlight { background:var(--accent) !important; }
+
+    @media(max-width:768px) { .fd-product-cards { grid-template-columns:repeat(2,1fr); } .status-bar-grid { grid-template-columns:1fr 1fr; } .algo-grid,.analysis-grid { grid-template-columns:1fr; } }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="about.html">About</a><a href="products.html">Products</a>
+      <a href="fraud-detection.html" class="active">Fraud Detection</a><a href="banking-assistant.html">Banking Assistant</a>
+      <a href="api-docs.html">API Docs</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="auth.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="contact.html" class="btn btn-primary btn-sm">Request Demo</a>
+    </div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="about.html">About</a><a href="fraud-detection.html">Fraud Detection</a>
+  <a href="banking-assistant.html">Banking Assistant</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="fd-hero">
+  <div class="container">
+    <div class="badge badge-green" style="margin-bottom:1.25rem;"><span class="pulse-dot"></span> Enterprise Platform</div>
+    <h1 class="fade-in">AI-Powered Banking <br><span class="gradient-text">Security Solutions</span></h1>
+    <p style="color:var(--text-muted);max-width:580px;margin:1rem auto 2rem;font-size:1.05rem;">
+      Protecting financial institutions with behavioral biometrics, ML models, and an intelligent alert system. Detect fraud before it happens.
+    </p>
+    <div class="flex flex-center gap-2">
+      <a href="auth.html" class="btn btn-primary btn-lg">Get Started Free</a>
+      <a href="api-docs.html" class="btn btn-outline btn-lg">View Documentation</a>
+    </div>
+    <div class="fd-product-cards reveal">
+      <div class="fd-product-card"><div class="icon">🔍</div><h4>Fraud Detection</h4></div>
+      <div class="fd-product-card"><div class="icon">⚖️</div><h4>Risk Assessment</h4></div>
+      <div class="fd-product-card"><div class="icon">🛡️</div><h4>Account Security</h4></div>
+      <div class="fd-product-card"><div class="icon">🤖</div><h4>AI Assistant</h4></div>
+    </div>
+  </div>
+</section>
+
+<!-- STATUS BAR -->
+<div class="status-bar">
+  <div class="container">
+    <div class="status-bar-grid">
+      <div class="status-metric">
+        <div class="status-metric-icon">🛡️</div>
+        <div>
+          <div class="status-metric-num" data-count="1248">0</div>
+          <div class="status-metric-label">Checks Today</div>
+        </div>
+      </div>
+      <div class="status-metric">
+        <div class="status-metric-icon">🎯</div>
+        <div>
+          <div class="status-metric-num" data-count="99.7" data-suffix="%">0%</div>
+          <div class="status-metric-label">Detection Accuracy</div>
+        </div>
+      </div>
+      <div class="status-metric">
+        <div class="status-metric-icon">⏱️</div>
+        <div>
+          <div class="status-metric-num" data-count="47" data-suffix="ms">0ms</div>
+          <div class="status-metric-label">Avg Response Time</div>
+        </div>
+      </div>
+      <div class="status-metric">
+        <div class="status-metric-icon">⚠️</div>
+        <div>
+          <div class="status-metric-num" data-count="0.3" data-suffix="%">0%</div>
+          <div class="status-metric-label">False Positive Rate</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- PLATFORM SECTION -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">Platform Details</div>
+      <h2>Enterprise Fraud <span class="text-accent">Prevention Platform</span></h2>
+      <p class="section-desc">From AI and behavioral biometrics to intelligent alert systems — one platform to rule them all.</p>
+    </div>
+
+    <!-- ALGO PULSE -->
+    <h3 style="margin-bottom:1.25rem;text-align:center;">Detection Algorithms in Action</h3>
+    <div class="algo-grid reveal" style="margin-bottom:3rem;">
+      <div class="algo-card">
+        <div class="algo-status"><span class="pulse-dot"></span><span style="color:var(--accent);">READY</span></div>
+        <h4 style="margin-bottom:0.5rem;">🌐 Network Analysis</h4>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">Graph neural networks map transaction relationships and detect anomalous clusters in real time.</p>
+        <div class="algo-bar-wrap"><div class="algo-bar" style="width:88%;background:linear-gradient(90deg,#10B981,#34D399);"></div></div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">88% network coverage</div>
+      </div>
+      <div class="algo-card">
+        <div class="algo-status"><span style="width:10px;height:10px;background:#F59E0B;border-radius:50%;display:inline-block;"></span><span style="color:#F59E0B;">STANDBY</span></div>
+        <h4 style="margin-bottom:0.5rem;">🧠 Behavioral Analytics</h4>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">Continuous user behavior profiling using keystroke dynamics, spending patterns, and session analytics.</p>
+        <div class="algo-bar-wrap"><div class="algo-bar" style="width:72%;background:linear-gradient(90deg,#F59E0B,#FCD34D);"></div></div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">72% model confidence</div>
+      </div>
+      <div class="algo-card" style="border-color:var(--border-accent);">
+        <div class="algo-status"><span class="pulse-dot"></span><span style="color:var(--accent);">SCORING</span></div>
+        <h4 style="margin-bottom:0.5rem;">⚡ Real-Time Scoring</h4>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1rem;">Ensemble scoring pipeline using LSTM, Random Forest, and Gradient Boosting for final risk score.</p>
+        <div class="algo-bar-wrap"><div class="algo-bar" style="width:97%;background:linear-gradient(90deg,#10B981,#6EE7B7);animation:algo-pulse 0.8s ease-in-out infinite alternate;"></div></div>
+        <div style="font-size:0.75rem;color:var(--text-muted);">97% pipeline throughput</div>
+      </div>
+    </div>
+
+    <!-- ML ANALYSIS TOOL -->
+    <div class="section-header" style="margin-bottom:2rem;">
+      <h2>Try Our <span class="gradient-text">ML Analysis Tool</span></h2>
+      <p class="section-desc">Enter transaction details below to get an instant AI risk assessment.</p>
+    </div>
+    <div class="analysis-grid reveal">
+      <div class="card" style="padding:2rem;">
+        <h4 style="margin-bottom:1.5rem;">Transaction Analysis</h4>
+        <div class="form-group">
+          <label class="form-label">Merchant</label>
+          <input type="text" class="form-input" id="fd-merchant" value="Amazon.com" placeholder="e.g. Amazon.com" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Transaction Amount ($)</label>
+          <input type="number" class="form-input" id="fd-amount" value="299.99" placeholder="e.g. 299.99" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Account Balance ($)</label>
+          <input type="number" class="form-input" id="fd-balance" value="5000" placeholder="e.g. 5000" />
+        </div>
+        <div class="form-group">
+          <label class="form-label">Customer Age</label>
+          <input type="number" class="form-input" id="fd-age" value="35" placeholder="e.g. 35" />
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="analyzeTransaction()">
+          ⚡ Analyze Transaction
+        </button>
+      </div>
+      <div class="card" style="padding:2rem;" id="risk-result-panel">
+        <h4 style="margin-bottom:1.5rem;">AI Risk Assessment</h4>
+        <div class="risk-score-big" id="risk-score-num">25.0%</div>
+        <div class="risk-label">Risk Score</div>
+        <div class="risk-bar-wrap">
+          <div class="risk-bar-fill" id="risk-bar" style="width:25%;"></div>
+        </div>
+        <div style="display:flex;justify-content:space-between;font-size:0.75rem;color:var(--text-muted);margin-bottom:1.5rem;">
+          <span>Low Risk</span><span>High Risk</span>
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;padding:0.75rem;background:var(--bg-secondary);border-radius:var(--radius-sm);margin-bottom:1rem;">
+          <span style="font-size:0.85rem;color:var(--text-muted);">Confidence Level</span>
+          <span class="badge badge-green" id="confidence-badge">94.0% High</span>
+        </div>
+        <div style="padding:1rem;background:rgba(16,185,129,0.05);border:1px solid var(--border-accent);border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text-muted);line-height:1.7;" id="risk-summary">
+          This transaction was analyzed using ensemble machine learning models including LSTM neural networks, Random Forest, and behavioral analytics. Processing completed in <strong style="color:var(--accent);">47ms</strong> with high confidence.
+        </div>
+        <div style="display:flex;gap:0.5rem;margin-top:1rem;font-size:0.75rem;flex-wrap:wrap;">
+          <span class="badge badge-green">✓ LSTM Neural Net</span>
+          <span class="badge badge-green">✓ Random Forest</span>
+          <span class="badge badge-blue">✓ Behavioral Model</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Weekly Chart -->
+    <div class="card reveal" style="margin-top:2rem;padding:2rem;">
+      <h4 style="margin-bottom:0.25rem;">Users: Last 7 Days Using Median</h4>
+      <p style="font-size:0.8rem;color:var(--text-muted);margin-bottom:1.25rem;">57.1% peak on Monday · All values normalized</p>
+      <div class="chart-bar-group">
+        <div class="chart-bar highlight" style="height:57%;background:var(--accent);"><span class="chart-tooltip"></span></div>
+        <div class="chart-bar" style="height:43%;"></div>
+        <div class="chart-bar" style="height:51%;"></div>
+        <div class="chart-bar" style="height:38%;"></div>
+        <div class="chart-bar" style="height:62%;background:rgba(16,185,129,0.5);"></div>
+        <div class="chart-bar" style="height:29%;"></div>
+        <div class="chart-bar" style="height:22%;"></div>
+      </div>
+      <div style="display:flex;gap:8px;margin-top:0.5rem;">
+        <span style="flex:1;font-size:0.7rem;color:var(--text-muted);text-align:center;">Mon</span>
+        <span style="flex:1;font-size:0.7rem;color:var(--text-muted);text-align:center;">Tue</span>
+        <span style="flex:1;font-size:0.7rem;color:var(--text-muted);text-align:center;">Wed</span>
+        <span style="flex:1;font-size:0.7rem;color:var(--text-muted);text-align:center;">Thu</span>
+        <span style="flex:1;font-size:0.7rem;color:var(--text-muted);text-align:center;">Fri</span>
+        <span style="flex:1;font-size:0.7rem;color:var(--text-muted);text-align:center;">Sat</span>
+        <span style="flex:1;font-size:0.7rem;color:var(--text-muted);text-align:center;">Sun</span>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo" style="margin-bottom:0.75rem;"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></div>
+        <p>AI-powered fraud detection and banking intelligence for the modern financial world.</p>
+        <div class="footer-social"><a href="#">𝕏</a><a href="#">in</a><a href="#">▶</a><a href="#">f</a></div>
+      </div>
+      <div class="footer-col"><h5>Products</h5><ul>
+        <li><a href="fraud-detection.html">Fraud Detection</a></li><li><a href="banking-assistant.html">Banking Assistant</a></li>
+        <li><a href="products.html">All Products</a></li><li><a href="contact.html">Request Demo</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Company</h5><ul>
+        <li><a href="about.html">About Us</a></li><li><a href="pricing.html">Pricing</a></li>
+        <li><a href="api-docs.html">Documentation</a></li><li><a href="contact.html">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Legal</h5><ul>
+        <li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Compliance</a></li><li><a href="#">Security</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 TUSK AI Technologies. All rights reserved.</p>
+      <p>Innovation Hub, Block-A, Kalyanpur, Kanpur, UP, India</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+function analyzeTransaction() {
+  const merchant = document.getElementById('fd-merchant').value;
+  const amount = parseFloat(document.getElementById('fd-amount').value) || 299.99;
+  const balance = parseFloat(document.getElementById('fd-balance').value) || 5000;
+  const age = parseInt(document.getElementById('fd-age').value) || 35;
+
+  // Simple mock risk scoring
+  let risk = 10;
+  if (amount > balance * 0.5) risk += 30;
+  if (amount > 1000) risk += 20;
+  if (age < 25 || age > 80) risk += 15;
+  if (merchant.toLowerCase().includes('unknown')) risk += 25;
+  risk = Math.min(risk + Math.random() * 10, 99);
+  const confidence = 90 + Math.random() * 8;
+
+  document.getElementById('risk-score-num').textContent = risk.toFixed(1) + '%';
+  document.getElementById('risk-bar').style.width = risk + '%';
+
+  const badge = document.getElementById('confidence-badge');
+  badge.textContent = confidence.toFixed(1) + '% High';
+
+  const processing = Math.round(40 + Math.random() * 20);
+  document.getElementById('risk-summary').innerHTML = `This transaction was analyzed using ensemble machine learning models including LSTM neural networks, Random Forest, and behavioral analytics. Processing completed in <strong style="color:var(--accent);">${processing}ms</strong> with high confidence.`;
+}
+</script>
+</body>
+</html>

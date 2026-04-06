@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>About Us — TUSK AI</title>
+  <meta name="description" content="Learn about TUSK AI's mission to secure the future of digital banking through AI-powered fraud detection and intelligent banking automation." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .about-hero { padding:8rem 0 4rem; text-align:center; background:radial-gradient(ellipse at 50% -5%,rgba(16,185,129,0.09) 0%,transparent 60%); }
+    .vision-grid { display:grid; grid-template-columns:1fr 1fr; gap:3rem; align-items:center; }
+    .vision-text p { margin-bottom:1rem; font-size:1.05rem; color:var(--text-secondary); }
+    .vision-stats { display:grid; grid-template-columns:1fr 1fr; gap:1rem; }
+    .vision-stat { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-align:center;transition:var(--transition); }
+    .vision-stat:hover { border-color:var(--border-accent); }
+    .vision-stat-num { font-size:2rem;font-weight:800;color:var(--accent);line-height:1; }
+    .vision-stat-label { font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem; }
+    .tech-grid { display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem; }
+    .tech-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:2rem;transition:var(--transition); }
+    .tech-card:hover { border-color:var(--border-accent);transform:translateY(-4px); }
+    .tech-icon { font-size:2.5rem;margin-bottom:1rem; }
+    .impact-grid { display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem; }
+    .impact-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.5rem;text-align:center; }
+    .impact-icon { font-size:1.8rem;margin-bottom:0.75rem; }
+    .impact-num { font-size:1.8rem;font-weight:800;color:var(--text-primary);line-height:1; }
+    .impact-label { font-size:0.8rem;color:var(--text-muted);margin-top:0.25rem; }
+    .timeline { position:relative; padding-left:2rem; }
+    .timeline::before { content:'';position:absolute;left:0;top:0;bottom:0;width:2px;background:linear-gradient(to bottom,var(--accent),var(--accent-dark),var(--border)); }
+    .timeline-item { position:relative;margin-bottom:2.5rem;padding-left:1.5rem; }
+    .timeline-item::before { content:'';position:absolute;left:-2.25rem;top:0.35rem;width:12px;height:12px;background:var(--accent);border-radius:50%;border:2px solid var(--bg-primary);box-shadow:0 0 8px var(--accent); }
+    .timeline-year { font-size:0.8rem;font-weight:700;color:var(--accent);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:0.25rem; }
+    .timeline-title { font-size:1.1rem;font-weight:600;margin-bottom:0.35rem; }
+    .timeline-desc { font-size:0.875rem;color:var(--text-muted); }
+    @media(max-width:768px) { .vision-grid,.tech-grid,.impact-grid{grid-template-columns:1fr;} .vision-stats{grid-template-columns:1fr 1fr;} }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="about.html" class="active">About</a><a href="products.html">Products</a>
+      <a href="fraud-detection.html">Fraud Detection</a><a href="banking-assistant.html">Banking Assistant</a>
+      <a href="api-docs.html">API Docs</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="auth.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="contact.html" class="btn btn-primary btn-sm">Request Demo</a>
+    </div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="about.html">About</a><a href="fraud-detection.html">Fraud Detection</a>
+  <a href="banking-assistant.html">Banking Assistant</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+</div>
+
+<section class="about-hero">
+  <div class="container">
+    <div class="badge badge-green" style="margin-bottom:1rem;">Our Story</div>
+    <h1 class="fade-in">Securing the Future of<br><span class="gradient-text">Digital Banking</span></h1>
+    <p style="color:var(--text-muted);max-width:600px;margin:1rem auto 0;font-size:1.05rem;">
+      Founded in 2023, TUSK AI is on a mission to make banking safer, smarter, and more accessible through the power of artificial intelligence.
+    </p>
+  </div>
+</section>
+
+<!-- WHAT IS TUSK AI -->
+<section class="section">
+  <div class="container">
+    <div class="vision-grid reveal">
+      <div class="vision-text">
+        <div class="section-label" style="margin-bottom:1rem;">What is TUSK AI?</div>
+        <h2 style="margin-bottom:1.25rem;">Built for the <span class="text-accent">Modern Bank</span></h2>
+        <p>TUSK AI is an enterprise-grade FinTech platform that combines cutting-edge machine learning with real-time behavioral analytics to protect financial institutions and their customers from fraud.</p>
+        <p>Our platform processes millions of transactions per day, learning and adapting continuously to emerging fraud patterns — while providing intelligent banking assistance through our RAGFlow-powered conversational AI.</p>
+        <p>From small credit unions to global banks, TUSK AI scales effortlessly to meet the demands of the modern financial landscape.</p>
+        <div style="margin-top:1.5rem;display:flex;gap:0.75rem;flex-wrap:wrap;">
+          <a href="fraud-detection.html" class="btn btn-primary">Explore Platform</a>
+          <a href="contact.html" class="btn btn-ghost">Contact Sales</a>
+        </div>
+      </div>
+      <div class="vision-stats">
+        <div class="vision-stat"><div class="vision-stat-num text-accent" data-count="99.7" data-suffix="%">0%</div><div class="vision-stat-label">Fraud Detection Accuracy</div></div>
+        <div class="vision-stat"><div class="vision-stat-num" data-count="47" data-suffix="ms">0ms</div><div class="vision-stat-label">Average Response Time</div></div>
+        <div class="vision-stat"><div class="vision-stat-num text-accent">24/7</div><div class="vision-stat-label">AI Monitoring</div></div>
+        <div class="vision-stat"><div class="vision-stat-num" data-count="4.8">0</div><div class="vision-stat-label">Customer Satisfaction (out of 5)</div></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- CORE TECHNOLOGIES -->
+<section class="section" style="background:rgba(16,20,27,0.4);">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">Our Technology</div>
+      <h2>Core <span class="text-accent">Technologies</span></h2>
+    </div>
+    <div class="tech-grid reveal">
+      <div class="tech-card">
+        <div class="tech-icon">🧠</div>
+        <h3>Advanced Machine Learning</h3>
+        <p>LSTM neural networks, Random Forest, and Gradient Boosting ensemble models — continuously trained on real-time transaction data to stay ahead of fraud.</p>
+        <ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.5rem;">
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> LSTM Neural Networks</li>
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> Random Forest Ensemble</li>
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> Behavioral Biometrics</li>
+        </ul>
+      </div>
+      <div class="tech-card" style="border-color:var(--border-accent);">
+        <div class="tech-icon">⚡</div>
+        <h3>Real-Time Processing</h3>
+        <p>Stream processing pipeline built on Apache Kafka and Flink, enabling sub-50ms transaction scoring at a scale of millions of events per second.</p>
+        <ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.5rem;">
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> Apache Kafka Streaming</li>
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> Sub-50ms Scoring</li>
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> 99.9% Uptime SLA</li>
+        </ul>
+      </div>
+      <div class="tech-card">
+        <div class="tech-icon">🔐</div>
+        <h3>Enterprise Security</h3>
+        <p>Zero-trust architecture, AES-256 encryption at rest and in transit, with full PCI-DSS, SOC 2 Type II, and ISO 27001 compliance certifications.</p>
+        <ul style="margin-top:1rem;display:flex;flex-direction:column;gap:0.5rem;">
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> AES-256 Encryption</li>
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> PCI-DSS Compliant</li>
+          <li style="font-size:0.85rem;color:var(--text-muted);display:flex;align-items:center;gap:0.5rem;"><span style="color:var(--accent);">✓</span> SOC 2 Type II Certified</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- IMPACT STATS -->
+<section class="section">
+  <div class="container">
+    <div class="section-header reveal"><div class="section-label">Our Impact</div><h2>Numbers That <span class="text-accent">Matter</span></h2></div>
+    <div class="impact-grid reveal">
+      <div class="impact-card"><div class="impact-icon">💰</div><div class="impact-num">$50M+</div><div class="impact-label">Fraud Prevented</div></div>
+      <div class="impact-card" style="border-color:var(--border-accent);"><div class="impact-icon">📊</div><div class="impact-num" data-count="1000000" data-suffix="+">0+</div><div class="impact-label">Transactions Secured</div></div>
+      <div class="impact-card"><div class="impact-icon">🤖</div><div class="impact-num" data-count="85" data-suffix="%">0%</div><div class="impact-label">Support Automation</div></div>
+      <div class="impact-card"><div class="impact-icon">⚡</div><div class="impact-num" data-count="60" data-suffix="%">0%</div><div class="impact-label">Faster Issue Resolution</div></div>
+    </div>
+  </div>
+</section>
+
+<!-- JOURNEY TIMELINE -->
+<section class="section" style="background:rgba(16,20,27,0.4);">
+  <div class="container">
+    <div class="section-header reveal">
+      <div class="section-label">Our Journey</div>
+      <h2>From Inception to <span class="text-accent">Innovation</span></h2>
+    </div>
+    <div style="max-width:640px;margin:0 auto;" class="reveal">
+      <div class="timeline">
+        <div class="timeline-item">
+          <div class="timeline-year">2023 — Inception</div>
+          <div class="timeline-title">TUSK AI Founded</div>
+          <div class="timeline-desc">Started with a small team of ML engineers and banking domain experts in Kanpur, India, with a vision to democratize enterprise-grade fraud detection.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2023 Q3 — First Product</div>
+          <div class="timeline-title">Fraud Detection Engine v1.0</div>
+          <div class="timeline-desc">Launched our first ML model with 92% accuracy, securing 3 pilot banks and processing over 10,000 daily transactions.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2024 Q1 — Scale</div>
+          <div class="timeline-title">Banking Assistant Launch</div>
+          <div class="timeline-desc">Integrated RAGFlow to power our conversational AI assistant. Onboarded 50+ financial institutions and crossed 1 million transactions secured.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2024 Q4 — Enterprise</div>
+          <div class="timeline-title">Enterprise Platform v2.0</div>
+          <div class="timeline-desc">Achieved 99.7% detection accuracy with LSTM ensemble models. SOC 2 Type II and PCI-DSS certifications obtained. $50M+ fraud prevented.</div>
+        </div>
+        <div class="timeline-item">
+          <div class="timeline-year">2025+ — Future</div>
+          <div class="timeline-title">Global Expansion & Innovation</div>
+          <div class="timeline-desc">Expanding to 20+ countries, launching mobile SDK, federated learning for privacy-preserving model training, and open API marketplace.</div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand"><div class="nav-logo" style="margin-bottom:0.75rem;"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></div><p>AI-powered fraud detection and banking intelligence.</p><div class="footer-social"><a href="#">𝕏</a><a href="#">in</a><a href="#">▶</a><a href="#">f</a></div></div>
+      <div class="footer-col"><h5>Products</h5><ul><li><a href="fraud-detection.html">Fraud Detection</a></li><li><a href="banking-assistant.html">Banking Assistant</a></li><li><a href="products.html">All Products</a></li></ul></div>
+      <div class="footer-col"><h5>Company</h5><ul><li><a href="about.html">About Us</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="contact.html">Contact</a></li></ul></div>
+      <div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Compliance</a></li></ul></div>
+    </div>
+    <div class="footer-bottom"><p>© 2025 TUSK AI Technologies. All rights reserved.</p><p>Innovation Hub, Block-A, Kalyanpur, Kanpur, UP, India</p></div>
+  </div>
+</footer>
+<script src="js/main.js"></script>
+</body>
+</html>

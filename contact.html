@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Contact Us — TUSK AI</title>
+  <meta name="description" content="Get in touch with TUSK AI. Headquarters: Innovation Hub, Block-A, Kalyanpur, Kanpur, UP, India. Support available 24/7." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .contact-grid { display:grid;grid-template-columns:1.5fr 1fr;gap:3rem;align-items:start; }
+    .contact-info-item { display:flex;gap:1rem;align-items:flex-start;margin-bottom:1.75rem; }
+    .contact-info-icon { width:44px;height:44px;background:var(--accent-glow);border:1px solid var(--border-accent);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;font-size:1.2rem;flex-shrink:0; }
+    .contact-info-label { font-size:0.75rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.25rem; }
+    .contact-info-val { font-size:0.9rem;color:var(--text-primary);font-weight:500; }
+    .contact-info-val a { color:var(--accent);transition:var(--transition); }
+    .contact-info-val a:hover { color:var(--accent-light); }
+    .hours-grid { display:grid;grid-template-columns:1fr 1fr;gap:0.5rem;margin-top:0.5rem; }
+    .hour-item { background:var(--bg-secondary);border-radius:6px;padding:0.5rem 0.75rem;font-size:0.8rem;color:var(--text-secondary); }
+    .map-placeholder { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);height:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;overflow:hidden;margin-top:1.5rem;position:relative; }
+    .map-inner { font-size:3rem;margin-bottom:0.5rem; }
+    .map-label { font-size:0.85rem;color:var(--text-muted); }
+    .form-row { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+    .success-msg { display:none;background:rgba(16,185,129,0.1);border:1px solid var(--border-accent);border-radius:var(--radius-md);padding:1rem;text-align:center;color:var(--accent);font-weight:600;margin-top:1rem; }
+    @media(max-width:768px) { .contact-grid{grid-template-columns:1fr;} .form-row{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="about.html">About</a><a href="products.html">Products</a>
+      <a href="fraud-detection.html">Fraud Detection</a><a href="banking-assistant.html">Banking Assistant</a>
+      <a href="api-docs.html">API Docs</a><a href="pricing.html">Pricing</a><a href="contact.html" class="active">Contact</a>
+    </div>
+    <div class="nav-actions"><a href="auth.html" class="btn btn-outline btn-sm">Sign In</a><a href="contact.html" class="btn btn-primary btn-sm">Request Demo</a></div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="fraud-detection.html">Fraud Detection</a>
+  <a href="banking-assistant.html">Banking Assistant</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+</div>
+
+<section class="page-hero">
+  <div class="container">
+    <div class="badge badge-green" style="margin-bottom:1rem;">Get In Touch</div>
+    <h1 class="fade-in">Contact <span class="gradient-text">TUSK AI</span></h1>
+    <p>We'd love to hear from you. Reach out for demos, partnerships, or technical support.</p>
+  </div>
+</section>
+
+<section class="section" style="padding-top:2rem;">
+  <div class="container">
+    <div class="contact-grid reveal">
+      <!-- FORM -->
+      <div class="card" style="padding:2rem;">
+        <h3 style="margin-bottom:0.25rem;">Send Us a Message</h3>
+        <p style="font-size:0.85rem;color:var(--text-muted);margin-bottom:1.75rem;">We typically respond within 2 business hours.</p>
+        <form id="contactForm" onsubmit="submitForm(event)">
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Full Name *</label><input type="text" class="form-input" placeholder="John Smith" required /></div>
+            <div class="form-group"><label class="form-label">Email Address *</label><input type="email" class="form-input" placeholder="john@bank.com" required /></div>
+          </div>
+          <div class="form-row">
+            <div class="form-group"><label class="form-label">Company / Institution *</label><input type="text" class="form-input" placeholder="Your Bank Name" required /></div>
+            <div class="form-group"><label class="form-label">Department</label><input type="text" class="form-input" placeholder="e.g. Risk & Compliance" /></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Inquiry Type *</label>
+            <select class="form-input" required>
+              <option value="">Select an inquiry type</option>
+              <option>Request a Demo</option>
+              <option>Sales Inquiry</option>
+              <option>Technical Support</option>
+              <option>Partnership</option>
+              <option>General Question</option>
+            </select>
+          </div>
+          <div class="form-group"><label class="form-label">Subject *</label><input type="text" class="form-input" placeholder="How can we help you?" required /></div>
+          <div class="form-group"><label class="form-label">Message *</label><textarea class="form-input" rows="5" placeholder="Tell us more about your needs..." required></textarea></div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.85rem;">Send Message ↗</button>
+        </form>
+        <div class="success-msg" id="successMsg">✅ Message sent successfully! We'll get back to you within 2 hours.</div>
+      </div>
+
+      <!-- INFO PANEL -->
+      <div>
+        <div class="card" style="padding:2rem;margin-bottom:1.5rem;">
+          <h4 style="margin-bottom:1.5rem;">Contact Information</h4>
+          <div class="contact-info-item">
+            <div class="contact-info-icon">🏢</div>
+            <div>
+              <div class="contact-info-label">Headquarters</div>
+              <div class="contact-info-val">Innovation Hub, Block-A<br>Kalyanpur, Kanpur 208017<br>Uttar Pradesh, India</div>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-info-icon">📞</div>
+            <div>
+              <div class="contact-info-label">Phone</div>
+              <div class="contact-info-val">
+                <a href="tel:+915122876543">+91 (512) 287-6543</a><br>
+                <a href="tel:+919876543210">+91 98765-43210</a>
+              </div>
+            </div>
+          </div>
+          <div class="contact-info-item">
+            <div class="contact-info-icon">✉️</div>
+            <div>
+              <div class="contact-info-label">Email</div>
+              <div class="contact-info-val">
+                <a href="mailto:info@tusk-ai.com">info@tusk-ai.com</a><br>
+                <a href="mailto:support@tusk-ai.com">support@tusk-ai.com</a>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card" style="padding:1.5rem;">
+          <h4 style="margin-bottom:1rem;">Business Hours</h4>
+          <div class="hours-grid">
+            <div class="hour-item"><div style="color:var(--text-muted);font-size:0.72rem;margin-bottom:0.2rem;">Mon – Fri</div>9:00 AM – 6:00 PM IST</div>
+            <div class="hour-item"><div style="color:var(--text-muted);font-size:0.72rem;margin-bottom:0.2rem;">Saturday</div>10:00 AM – 4:00 PM IST</div>
+            <div class="hour-item" style="grid-column:1/-1;"><div style="color:var(--text-muted);font-size:0.72rem;margin-bottom:0.2rem;">Technical Support</div><span class="badge badge-green" style="font-size:0.72rem;"><span class="pulse-dot" style="width:5px;height:5px;"></span> 24/7/365</span></div>
+          </div>
+          <div class="map-placeholder">
+            <div class="map-inner">🗺️</div>
+            <div class="map-label">Kalyanpur, Kanpur, Uttar Pradesh, India</div>
+            <div style="font-size:0.75rem;color:var(--text-faint);margin-top:0.25rem;">Innovation Hub, Block-A</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer class="footer"><div class="container"><div class="footer-grid"><div class="footer-brand"><div class="nav-logo" style="margin-bottom:0.75rem;"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></div><p>AI-powered fraud detection and banking intelligence.</p><div class="footer-social"><a href="#">𝕏</a><a href="#">in</a><a href="#">▶</a><a href="#">f</a></div></div><div class="footer-col"><h5>Products</h5><ul><li><a href="fraud-detection.html">Fraud Detection</a></li><li><a href="banking-assistant.html">Banking Assistant</a></li><li><a href="products.html">All Products</a></li></ul></div><div class="footer-col"><h5>Company</h5><ul><li><a href="about.html">About Us</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="contact.html">Contact</a></li></ul></div><div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li><li><a href="#">Compliance</a></li></ul></div></div><div class="footer-bottom"><p>© 2025 TUSK AI Technologies. All rights reserved.</p><p>Innovation Hub, Block-A, Kalyanpur, Kanpur, UP, India</p></div></div></footer>
+<script src="js/main.js"></script>
+<script>
+function submitForm(e) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.textContent = 'Sending...';
+  btn.disabled = true;
+  setTimeout(() => {
+    e.target.reset();
+    btn.style.display = 'none';
+    document.getElementById('successMsg').style.display = 'block';
+  }, 1200);
+}
+</script>
+</body>
+</html>

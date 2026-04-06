@@ -1,0 +1,167 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Sign In — TUSK AI</title>
+  <meta name="description" content="Sign in to your TUSK AI account or register for fraud detection and banking assistant services." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    body { display:flex;flex-direction:column;min-height:100vh;background:radial-gradient(ellipse at 50% 0%,rgba(16,185,129,0.07) 0%,var(--bg-primary) 60%); }
+    .auth-page { flex:1;display:flex;align-items:center;justify-content:center;padding:6rem 1.5rem 2rem; }
+    .auth-container { width:100%;max-width:480px; }
+    .auth-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-xl);padding:2.5rem;box-shadow:0 20px 60px rgba(0,0,0,0.5); }
+    .auth-logo { text-align:center;margin-bottom:1.75rem; }
+    .auth-logo .nav-logo { justify-content:center;font-size:1.5rem; }
+    .auth-tabs { display:flex;background:var(--bg-secondary);border-radius:var(--radius-md);padding:4px;margin-bottom:2rem; }
+    .auth-tab { flex:1;padding:0.65rem;text-align:center;border-radius:calc(var(--radius-md) - 2px);font-size:0.875rem;font-weight:600;cursor:pointer;transition:var(--transition);color:var(--text-muted); }
+    .auth-tab.active { background:var(--bg-card);color:var(--text-primary);box-shadow:0 1px 6px rgba(0,0,0,0.3); }
+    .auth-panel { display:none; }
+    .auth-panel.active { display:block; }
+    .google-btn { width:100%;padding:0.75rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);display:flex;align-items:center;justify-content:center;gap:0.6rem;font-size:0.9rem;font-weight:600;color:var(--text-secondary);cursor:pointer;transition:var(--transition);margin-bottom:1.5rem; }
+    .google-btn:hover { border-color:var(--border-accent);color:var(--text-primary);background:var(--bg-card-hover); }
+    .divider-text { display:flex;align-items:center;gap:1rem;margin-bottom:1.5rem;color:var(--text-muted);font-size:0.8rem; }
+    .divider-text::before,.divider-text::after { content:'';flex:1;height:1px;background:var(--border); }
+    .clearance-options { display:grid;grid-template-columns:repeat(3,1fr);gap:0.5rem; }
+    .clearance-opt { padding:0.5rem;text-align:center;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:0.78rem;cursor:pointer;transition:var(--transition);color:var(--text-muted); }
+    .clearance-opt:hover,.clearance-opt.selected { border-color:var(--border-accent);color:var(--accent);background:var(--accent-glow); }
+    .terms-row { display:flex;align-items:flex-start;gap:0.65rem;font-size:0.82rem;color:var(--text-muted);margin-bottom:1.5rem; }
+    .terms-row input[type=checkbox] { margin-top:2px;accent-color:var(--accent);cursor:pointer; }
+    .terms-row a { color:var(--accent); }
+    .auth-footer { text-align:center;margin-top:1.5rem;font-size:0.85rem;color:var(--text-muted); }
+    .auth-footer a { color:var(--accent); }
+    .security-note { display:flex;align-items:center;justify-content:center;gap:0.5rem;font-size:0.75rem;color:var(--text-muted);margin-top:1.25rem; }
+    .form-row-2 { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+    @media(max-width:500px) { .form-row-2{grid-template-columns:1fr;} .clearance-options{grid-template-columns:1fr 1fr;} }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="about.html">About</a><a href="products.html">Products</a>
+      <a href="fraud-detection.html">Fraud Detection</a><a href="banking-assistant.html">Banking Assistant</a>
+      <a href="api-docs.html">API Docs</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+    </div>
+    <div class="nav-actions"><a href="contact.html" class="btn btn-primary btn-sm">Request Demo</a></div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+
+<main class="auth-page">
+  <div class="auth-container">
+    <div class="auth-logo">
+      <div class="nav-logo"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></div>
+      <p style="color:var(--text-muted);font-size:0.85rem;margin-top:0.5rem;">Enterprise Banking Intelligence Platform</p>
+    </div>
+    <div class="auth-card">
+      <div class="auth-tabs">
+        <div class="auth-tab active" onclick="switchAuth('signin', this)">Sign In</div>
+        <div class="auth-tab" onclick="switchAuth('register', this)">Register</div>
+      </div>
+
+      <!-- SIGN IN PANEL -->
+      <div class="auth-panel active" id="panel-signin">
+        <button class="google-btn">
+          <span style="font-size:1.2rem;">G</span>
+          Continue with Google
+        </button>
+        <div class="divider-text">or sign in with email</div>
+        <form onsubmit="handleAuth(event,'Signed in')">
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" placeholder="you@institution.com" required />
+          </div>
+          <div class="form-group" style="margin-bottom:0.5rem;">
+            <label class="form-label">Password</label>
+            <input type="password" class="form-input" placeholder="••••••••••" required />
+          </div>
+          <div style="text-align:right;margin-bottom:1.25rem;"><a href="#" style="font-size:0.82rem;color:var(--accent);">Forgot password?</a></div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.85rem;">Sign In Securely</button>
+        </form>
+        <div class="auth-footer">Don't have an account? <a href="#" onclick="switchAuthByName('register')">Register here</a></div>
+      </div>
+
+      <!-- REGISTER PANEL -->
+      <div class="auth-panel" id="panel-register">
+        <button class="google-btn">
+          <span style="font-size:1.2rem;">G</span>
+          Continue with Google
+        </button>
+        <div class="divider-text">or create your account</div>
+        <form onsubmit="handleAuth(event,'Registration complete')">
+          <div class="form-row-2">
+            <div class="form-group"><label class="form-label">Full Name *</label><input type="text" class="form-input" placeholder="Jane Doe" required /></div>
+            <div class="form-group"><label class="form-label">Position *</label><input type="text" class="form-input" placeholder="Risk Analyst" required /></div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group"><label class="form-label">Company *</label><input type="text" class="form-input" placeholder="Your Bank" required /></div>
+            <div class="form-group"><label class="form-label">Department</label><input type="text" class="form-input" placeholder="Risk & Compliance" /></div>
+          </div>
+          <div class="form-row-2">
+            <div class="form-group"><label class="form-label">Employee ID *</label><input type="text" class="form-input" placeholder="EMP-00123" required /></div>
+            <div class="form-group"><label class="form-label">Phone</label><input type="tel" class="form-input" placeholder="+91 98765-43210" /></div>
+          </div>
+          <div class="form-group">
+            <label class="form-label">Security Clearance Level</label>
+            <div class="clearance-options">
+              <div class="clearance-opt selected" onclick="selectClearance(this)">Standard</div>
+              <div class="clearance-opt" onclick="selectClearance(this)">Enhanced</div>
+              <div class="clearance-opt" onclick="selectClearance(this)">Executive</div>
+            </div>
+          </div>
+          <div class="form-group" style="margin-top:0.75rem;">
+            <label class="form-label">Email Address *</label>
+            <input type="email" class="form-input" placeholder="you@institution.com" required />
+          </div>
+          <div class="form-group">
+            <label class="form-label">Password *</label>
+            <input type="password" class="form-input" placeholder="Min 8 characters" required />
+          </div>
+          <div class="terms-row">
+            <input type="checkbox" id="terms" required />
+            <label for="terms">I agree to the <a href="#">Terms of Service</a>, <a href="#">Privacy Policy</a>, and TUSK AI data processing agreement.</label>
+          </div>
+          <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;padding:0.85rem;">Create Account</button>
+        </form>
+        <div class="auth-footer">Already have an account? <a href="#" onclick="switchAuthByName('signin')">Sign in</a></div>
+      </div>
+
+      <div class="security-note">🔒 256-bit AES encrypted · PCI-DSS compliant · SOC 2 certified</div>
+    </div>
+  </div>
+</main>
+
+<script src="js/main.js"></script>
+<script>
+function switchAuth(panel, btn) {
+  document.querySelectorAll('.auth-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.auth-tab').forEach(t => t.classList.remove('active'));
+  document.getElementById('panel-' + panel).classList.add('active');
+  btn.classList.add('active');
+}
+function switchAuthByName(panel) {
+  const tabs = document.querySelectorAll('.auth-tab');
+  const btn = panel === 'signin' ? tabs[0] : tabs[1];
+  switchAuth(panel, btn);
+}
+function selectClearance(el) {
+  el.closest('.clearance-options').querySelectorAll('.clearance-opt').forEach(o => o.classList.remove('selected'));
+  el.classList.add('selected');
+}
+function handleAuth(e, msg) {
+  e.preventDefault();
+  const btn = e.target.querySelector('button[type=submit]');
+  btn.textContent = 'Processing...';
+  btn.disabled = true;
+  setTimeout(() => {
+    btn.textContent = '✅ ' + msg + '!';
+    btn.style.background = 'rgba(16,185,129,0.2)';
+    btn.style.color = 'var(--accent)';
+    setTimeout(() => window.location.href = 'index.html', 1500);
+  }, 1200);
+}
+</script>
+</body>
+</html>

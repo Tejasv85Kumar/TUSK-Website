@@ -1,0 +1,258 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Banking Assistant — TUSK AI</title>
+  <meta name="description" content="TUSK AI's RAGFlow-powered banking assistant provides real-time account support, fraud reporting, and intelligent financial guidance 24/7." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .ba-hero { padding:8rem 0 3rem; text-align:center; background:radial-gradient(ellipse at 50% -5%,rgba(16,185,129,0.09) 0%,transparent 60%); }
+    .ba-stats { display:grid; grid-template-columns:repeat(4,1fr); gap:1rem; margin-bottom:3rem; }
+    .ba-stat { display:flex;align-items:center;gap:0.75rem; background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1rem 1.25rem; }
+    .ba-stat-icon { font-size:1.4rem; }
+    .ba-stat-num { font-size:1.3rem;font-weight:800;color:var(--text-primary); }
+    .ba-stat-label { font-size:0.75rem;color:var(--text-muted); }
+
+    .chat-layout { display:grid;grid-template-columns:280px 1fr;gap:1.5rem;align-items:start; }
+    .commands-sidebar { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;position:sticky;top:90px; }
+    .commands-sidebar h4 { font-size:0.8rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:1rem; }
+    .cmd-item { padding:0.75rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-sm);margin-bottom:0.6rem;cursor:pointer;transition:var(--transition);font-size:0.82rem;color:var(--text-secondary); }
+    .cmd-item:hover { border-color:var(--border-accent);color:var(--text-primary);background:var(--accent-glow); }
+
+    .chatbox { background:var(--bg-card);border:1px solid var(--border-accent);border-radius:var(--radius-lg);display:flex;flex-direction:column;min-height:600px; }
+    .chat-header { padding:1.25rem 1.5rem;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:0.75rem; }
+    .chat-header-avatar { width:42px;height:42px;background:var(--accent-glow);border:1.5px solid var(--border-accent);border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:1.2rem; }
+    .chat-header-info h4 { font-size:0.95rem; }
+    .chat-header-badges { display:flex;gap:0.5rem;margin-top:0.25rem; }
+    .chat-messages { flex:1;padding:1.25rem 1.5rem;display:flex;flex-direction:column;gap:1rem;overflow-y:auto;max-height:400px; }
+    .msg { max-width:80%;animation:fadeInUp 0.3s ease; }
+    .msg-bot { align-self:flex-start; }
+    .msg-user { align-self:flex-end; }
+    .msg-bubble { padding:0.85rem 1.1rem;border-radius:var(--radius-md);font-size:0.875rem;line-height:1.6; }
+    .msg-bot .msg-bubble { background:var(--bg-secondary);border:1px solid var(--border);color:var(--text-primary);border-radius:4px 16px 16px 16px; }
+    .msg-user .msg-bubble { background:var(--accent);color:#000;font-weight:500;border-radius:16px 16px 4px 16px; }
+    .msg-time { font-size:0.7rem;color:var(--text-muted);margin-top:0.3rem; }
+    .msg-bot .msg-time { text-align:left;padding-left:0.25rem; }
+    .msg-user .msg-time { text-align:right;padding-right:0.25rem; }
+
+    .quick-actions-row { display:flex;gap:0.5rem;flex-wrap:wrap;padding:0.75rem 1.5rem;border-top:1px solid var(--border); }
+    .qa-pill { padding:0.4rem 0.9rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:999px;font-size:0.78rem;color:var(--text-secondary);cursor:pointer;transition:var(--transition);white-space:nowrap; }
+    .qa-pill:hover { border-color:var(--border-accent);color:var(--accent); }
+
+    .chat-input-area { padding:1rem 1.5rem;border-top:1px solid var(--border);display:flex;gap:0.75rem;align-items:center; }
+    .chat-input { flex:1;padding:0.75rem 1rem;background:var(--bg-secondary);border:1px solid var(--border);border-radius:var(--radius-md);color:var(--text-primary);font-size:0.875rem;transition:var(--transition); }
+    .chat-input:focus { border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow); }
+    .chat-input::placeholder { color:var(--text-muted); }
+    .chat-send { width:42px;height:42px;background:var(--accent);border-radius:var(--radius-sm);display:flex;align-items:center;justify-content:center;font-size:1.1rem;cursor:pointer;transition:var(--transition);flex-shrink:0; }
+    .chat-send:hover { background:var(--accent-light);transform:scale(1.05); }
+    .powered-by { text-align:center;font-size:0.7rem;color:var(--text-muted);padding:0.5rem;border-top:1px solid var(--border); }
+
+    .typing-indicator { display:flex;align-items:center;gap:4px;padding:0.5rem 0; }
+    .typing-dot { width:6px;height:6px;background:var(--text-muted);border-radius:50%;animation:typing-bounce 1.4s ease-in-out infinite; }
+    .typing-dot:nth-child(2) { animation-delay:0.2s; }
+    .typing-dot:nth-child(3) { animation-delay:0.4s; }
+    @keyframes typing-bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+
+    @media(max-width:768px) { .ba-stats{grid-template-columns:1fr 1fr;} .chat-layout{grid-template-columns:1fr;} .commands-sidebar{position:static;} }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="about.html">About</a><a href="products.html">Products</a>
+      <a href="fraud-detection.html">Fraud Detection</a><a href="banking-assistant.html" class="active">Banking Assistant</a>
+      <a href="api-docs.html">API Docs</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+    </div>
+    <div class="nav-actions">
+      <a href="auth.html" class="btn btn-outline btn-sm">Sign In</a>
+      <a href="contact.html" class="btn btn-primary btn-sm">Request Demo</a>
+    </div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="fraud-detection.html">Fraud Detection</a>
+  <a href="banking-assistant.html">Banking Assistant</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+</div>
+
+<!-- HERO -->
+<section class="ba-hero">
+  <div class="container">
+    <div class="badge badge-green" style="margin-bottom:1rem;"><span class="pulse-dot"></span> RAGFlow Powered</div>
+    <h1 class="fade-in">AI <span class="gradient-text">Banking Assistant</span></h1>
+    <p style="color:var(--text-muted);max-width:560px;margin:0.75rem auto 1.75rem;font-size:1.05rem;">
+      Conversational AI with natural language processing, real-time account data retrieval, and intelligent banking guidance — available 24/7.
+    </p>
+    <div class="flex flex-center gap-2">
+      <button class="btn btn-ghost btn-lg" onclick="document.querySelector('.chat-input').focus()">Learning Mode</button>
+      <a href="api-docs.html" class="btn btn-primary btn-lg">Integration Guide</a>
+    </div>
+  </div>
+</section>
+
+<section class="section" style="padding-top:1rem;">
+  <div class="container">
+    <!-- STATS -->
+    <div class="ba-stats reveal">
+      <div class="ba-stat"><div class="ba-stat-icon">👥</div><div><div class="ba-stat-num" data-count="3240">0</div><div class="ba-stat-label">Handled Today</div></div></div>
+      <div class="ba-stat"><div class="ba-stat-icon">⏱️</div><div><div class="ba-stat-num">12s</div><div class="ba-stat-label">Avg Resolution Time</div></div></div>
+      <div class="ba-stat"><div class="ba-stat-icon">📈</div><div><div class="ba-stat-num">4.8/5.0</div><div class="ba-stat-label">Customer Satisfaction</div></div></div>
+      <div class="ba-stat"><div class="ba-stat-icon">⚡</div><div><div class="ba-stat-num" data-count="87" data-suffix="%">0%</div><div class="ba-stat-label">Automation Rate</div></div></div>
+    </div>
+
+    <!-- CHAT LAYOUT -->
+    <div class="chat-layout">
+      <div class="commands-sidebar reveal">
+        <h4>Commands to Try</h4>
+        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">💳 Check my account balance</div>
+        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">📋 Show recent transactions</div>
+        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">🚨 How do I report fraud?</div>
+        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">📍 Find nearby ATM</div>
+        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">💸 How to set up automatic bill payments</div>
+        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">🏦 What are the loan interest rates?</div>
+        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">🔐 How to update my password?</div>
+        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">📊 Analyze my spending patterns</div>
+      </div>
+
+      <div class="chatbox reveal">
+        <div class="chat-header">
+          <div class="chat-header-avatar">🤖</div>
+          <div class="chat-header-info">
+            <h4>TUSK AI Banking Assistant</h4>
+            <div class="chat-header-badges">
+              <span class="badge badge-green" style="font-size:0.65rem;">🔒 Secure</span>
+              <span class="badge badge-blue" style="font-size:0.65rem;">⚡ Intelligent</span>
+              <span class="badge badge-green" style="font-size:0.65rem;"><span class="pulse-dot" style="width:5px;height:5px;"></span> Always Available</span>
+            </div>
+          </div>
+        </div>
+
+        <div class="chat-messages" id="chatMessages">
+          <div class="msg msg-bot">
+            <div class="msg-bubble">
+              👋 Hello! I'm your <strong>TUSK AI Banking Assistant</strong> powered by RAGFlow.<br><br>
+              I can help you with account balances, transaction history, fraud reporting, loan information, and much more. How can I assist you today?
+            </div>
+            <div class="msg-time">Just now · RAGFlow Powered</div>
+          </div>
+        </div>
+
+        <div class="quick-actions-row">
+          <button class="qa-pill" onclick="sendMessage('Check my account balance')">💳 Check account balance</button>
+          <button class="qa-pill" onclick="sendMessage('Show recent transactions')">📋 Recent transactions</button>
+          <button class="qa-pill" onclick="sendMessage('How do I report fraud?')">🚨 Report fraud</button>
+          <button class="qa-pill" onclick="sendMessage('Find nearby ATM')">📍 Find nearby ATM</button>
+        </div>
+
+        <div class="chat-input-area">
+          <input type="text" class="chat-input" id="chatInput" placeholder="Ask about your account..." onkeydown="if(event.key==='Enter') sendFromInput()" />
+          <div class="chat-send" onclick="sendFromInput()">➤</div>
+        </div>
+        <div class="powered-by">Powered by RAGFlow + TUSK AI · End-to-End Encrypted · 🔒</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- FOOTER -->
+<footer class="footer">
+  <div class="container">
+    <div class="footer-grid">
+      <div class="footer-brand">
+        <div class="nav-logo" style="margin-bottom:0.75rem;"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></div>
+        <p>AI-powered fraud detection and banking intelligence for the modern financial world.</p>
+        <div class="footer-social"><a href="#">𝕏</a><a href="#">in</a><a href="#">▶</a><a href="#">f</a></div>
+      </div>
+      <div class="footer-col"><h5>Products</h5><ul>
+        <li><a href="fraud-detection.html">Fraud Detection</a></li><li><a href="banking-assistant.html">Banking Assistant</a></li>
+        <li><a href="products.html">All Products</a></li><li><a href="contact.html">Request Demo</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Company</h5><ul>
+        <li><a href="about.html">About Us</a></li><li><a href="pricing.html">Pricing</a></li>
+        <li><a href="api-docs.html">Documentation</a></li><li><a href="contact.html">Contact</a></li>
+      </ul></div>
+      <div class="footer-col"><h5>Legal</h5><ul>
+        <li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li>
+        <li><a href="#">Compliance</a></li><li><a href="#">Security</a></li>
+      </ul></div>
+    </div>
+    <div class="footer-bottom">
+      <p>© 2025 TUSK AI Technologies. All rights reserved.</p>
+      <p>Innovation Hub, Block-A, Kalyanpur, Kanpur, UP, India</p>
+    </div>
+  </div>
+</footer>
+
+<script src="js/main.js"></script>
+<script>
+const responses = {
+  default: [
+    "Based on our RAGFlow knowledge base, I can help you with that! Could you provide a bit more detail so I can give you the most accurate information?",
+    "Great question! Let me retrieve the relevant banking data for you. According to our records and guidelines, here's what you need to know...",
+    "I've analyzed your request using our AI models. Here's a comprehensive answer based on your account context and our banking policies."
+  ],
+  balance: "Your current account balance is **$12,450.00** (Savings) and **$3,280.50** (Checking). Your last transaction was a ₹2,499 credit on March 25th. Would you like a full statement?",
+  transaction: "Here are your last 5 transactions:\n• Amazon.com — $299.99 (Mar 24)\n• Starbucks — $6.45 (Mar 23)\n• Netflix — $15.99 (Mar 22)\n• Salary Credit — +$5,000.00 (Mar 21)\n• Electricity Bill — $89.00 (Mar 20)\n\nNeed more details on any transaction?",
+  fraud: "To report fraud immediately:\n1. **Call:** +91 98765-43210 (24/7 hotline)\n2. **Online:** Go to Account > Security > Report Fraud\n3. **I can block** your card right now — just say 'Block my card'\n\nYour account is being flagged for immediate review by our fraud team.",
+  atm: "Nearest ATMs to your registered address (Kanpur, UP):\n• TUSK Bank ATM — Civil Lines (0.3 km) ✅ Available\n• SBI ATM — Kidwai Nagar (0.8 km) ✅ Available\n• HDFC ATM — Harsh Nagar (1.2 km) ⚠ Low Cash\n\nAll are open 24/7.",
+  payment: "To set up automatic bill payments:\n1. Login → **Payments** → Auto-Pay\n2. Select payee (electric, phone, etc.)\n3. Set amount & due date\n4. Choose debit account\n5. Confirm with OTP\n\nAutomatic payments are processed at midnight on your chosen date. Would you like me to set one up now?",
+};
+
+function getResponse(msg) {
+  const lower = msg.toLowerCase();
+  if (lower.includes('balance')) return responses.balance;
+  if (lower.includes('transaction') || lower.includes('recent') || lower.includes('history')) return responses.transaction;
+  if (lower.includes('fraud') || lower.includes('report')) return responses.fraud;
+  if (lower.includes('atm')) return responses.atm;
+  if (lower.includes('payment') || lower.includes('bill') || lower.includes('automatic')) return responses.payment;
+  return responses.default[Math.floor(Math.random() * responses.default.length)];
+}
+
+function addMessage(text, type) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = `msg msg-${type}`;
+  const now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div><div class="msg-time">${now}</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function showTyping() {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-bot';
+  div.id = 'typing-indicator';
+  div.innerHTML = '<div class="msg-bubble"><div class="typing-indicator"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div></div>';
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function removeTyping() {
+  const el = document.getElementById('typing-indicator');
+  if (el) el.remove();
+}
+
+function sendMessage(text) {
+  addMessage(text, 'user');
+  showTyping();
+  const delay = 900 + Math.random() * 600;
+  setTimeout(() => {
+    removeTyping();
+    addMessage(getResponse(text), 'bot');
+  }, delay);
+  document.getElementById('chatInput').value = '';
+}
+
+function sendFromInput() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  sendMessage(text);
+}
+</script>
+</body>
+</html>

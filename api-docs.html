@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>API Documentation — TUSK AI</title>
+  <meta name="description" content="TUSK AI developer API documentation. Integrate fraud detection and banking assistant into your platform with our REST API." />
+  <link rel="stylesheet" href="css/style.css" />
+  <style>
+    .docs-layout { display:grid;grid-template-columns:240px 1fr;gap:2rem;padding-top:6rem;min-height:100vh; }
+    .docs-sidebar { position:sticky;top:80px;height:fit-content;background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-lg);padding:1.25rem;font-size:0.85rem; }
+    .docs-sidebar h5 { font-size:0.7rem;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-muted);margin-bottom:0.75rem;margin-top:1rem; }
+    .docs-sidebar h5:first-child { margin-top:0; }
+    .docs-nav-link { display:block;padding:0.45rem 0.75rem;color:var(--text-muted);border-radius:6px;cursor:pointer;transition:var(--transition);margin-bottom:0.15rem; }
+    .docs-nav-link:hover,.docs-nav-link.active { color:var(--accent);background:var(--accent-glow); }
+    .docs-content { padding-bottom:4rem; }
+    .docs-section { margin-bottom:3rem; }
+    .docs-section h1 { font-size:1.8rem;margin-bottom:0.5rem; }
+    .docs-section h2 { font-size:1.3rem;margin-bottom:0.75rem;padding-bottom:0.5rem;border-bottom:1px solid var(--border); }
+    .docs-section p { color:var(--text-secondary);margin-bottom:1rem;font-size:0.9rem; }
+    .code-tabs { display:flex;gap:0.25rem;margin-bottom:0; }
+    .code-tab { padding:0.45rem 1rem;font-size:0.8rem;font-weight:600;border-radius:6px 6px 0 0;cursor:pointer;transition:var(--transition);color:var(--text-muted);background:var(--bg-secondary);border:1px solid var(--border);border-bottom:none; }
+    .code-tab.active { background:var(--bg-card);color:var(--accent);border-color:var(--border-accent); }
+    .code-block { border-radius:0 var(--radius-md) var(--radius-md);border-top:none; }
+    .endpoint-grid { display:grid;grid-template-columns:1fr 1fr;gap:1rem; }
+    .endpoint-card { background:var(--bg-card);border:1px solid var(--border);border-radius:var(--radius-md);padding:1.25rem;transition:var(--transition); }
+    .endpoint-card:hover { border-color:var(--border-accent); }
+    .method-badge { padding:0.2rem 0.6rem;border-radius:4px;font-size:0.7rem;font-weight:700;margin-right:0.5rem; }
+    .method-post { background:rgba(16,185,129,0.15);color:var(--accent); }
+    .method-get { background:rgba(59,130,246,0.15);color:#93C5FD; }
+    .endpoint-path { font-family:'Courier New',monospace;font-size:0.85rem;color:var(--text-primary); }
+    .endpoint-desc { font-size:0.8rem;color:var(--text-muted);margin-top:0.5rem; }
+    @media(max-width:768px) { .docs-layout{grid-template-columns:1fr;} .docs-sidebar{position:static;} .endpoint-grid{grid-template-columns:1fr;} }
+  </style>
+</head>
+<body>
+<nav class="navbar">
+  <div class="nav-inner">
+    <a href="index.html" class="nav-logo"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></a>
+    <div class="nav-links">
+      <a href="index.html">Home</a><a href="about.html">About</a><a href="products.html">Products</a>
+      <a href="fraud-detection.html">Fraud Detection</a><a href="banking-assistant.html">Banking Assistant</a>
+      <a href="api-docs.html" class="active">API Docs</a><a href="pricing.html">Pricing</a><a href="contact.html">Contact</a>
+    </div>
+    <div class="nav-actions"><a href="auth.html" class="btn btn-outline btn-sm">Sign In</a><a href="contact.html" class="btn btn-primary btn-sm">Request Demo</a></div>
+    <button class="nav-hamburger"><span></span><span></span><span></span></button>
+  </div>
+</nav>
+<div class="mobile-menu">
+  <a href="index.html">Home</a><a href="fraud-detection.html">Fraud Detection</a>
+  <a href="banking-assistant.html">Banking Assistant</a><a href="api-docs.html">API Docs</a><a href="contact.html">Contact</a>
+</div>
+
+<div class="container docs-layout">
+  <aside class="docs-sidebar">
+    <h5>Getting Started</h5>
+    <a class="docs-nav-link active" onclick="showSection('start')">Start Guide</a>
+    <a class="docs-nav-link" onclick="showSection('auth')">Authentication</a>
+    <a class="docs-nav-link" onclick="showSection('config')">Configuration</a>
+    <a class="docs-nav-link" onclick="showSection('testing')">Testing</a>
+    <h5>API Reference</h5>
+    <a class="docs-nav-link" onclick="showSection('transactions')">Transactions</a>
+    <a class="docs-nav-link" onclick="showSection('assistant')">Assistant</a>
+    <a class="docs-nav-link" onclick="showSection('alerts')">Alerts</a>
+    <h5>Resources</h5>
+    <a class="docs-nav-link" href="pricing.html">Rate Limits</a>
+    <a class="docs-nav-link" href="contact.html">Support</a>
+  </aside>
+  <main class="docs-content">
+    <!-- START -->
+    <div class="docs-section" id="sec-start">
+      <div class="badge badge-green" style="margin-bottom:1rem;">v2.1.0 — Latest</div>
+      <h1>TUSK AI <span class="gradient-text">API Reference</span></h1>
+      <p>The TUSK AI API is organized around REST. Returns JSON-encoded responses, uses standard HTTP response codes, and accepts form-encoded request bodies.</p>
+      <div class="card" style="border-color:var(--border-accent);margin-bottom:1.5rem;">
+        <div style="font-size:0.8rem;color:var(--text-muted);margin-bottom:0.5rem;">Base URL</div>
+        <code style="color:var(--accent);font-size:1rem;">https://api.tusk-ai.com/v1</code>
+      </div>
+      <h2>Quick Start</h2>
+      <div class="code-tabs"><div class="code-tab active" onclick="switchTab('js',this)">JavaScript</div><div class="code-tab" onclick="switchTab('py',this)">Python</div><div class="code-tab" onclick="switchTab('java',this)">Java</div><div class="code-tab" onclick="switchTab('cs',this)">C#</div></div>
+      <div class="code-block">
+        <pre id="code-js"><code><span class="code-comment">// Initialize the TUSK AI client</span>
+<span class="code-keyword">import</span> { TuskAI } <span class="code-keyword">from</span> <span class="code-string">'@tusk-ai/sdk'</span>;
+
+<span class="code-keyword">const</span> client = <span class="code-keyword">new</span> <span class="code-func">TuskAI</span>({
+  apiKey: <span class="code-string">'your_api_key_here'</span>,
+  environment: <span class="code-string">'production'</span>
+});
+
+<span class="code-comment">// Analyze a transaction</span>
+<span class="code-keyword">const</span> result = <span class="code-keyword">await</span> client.transactions.<span class="code-func">analyze</span>({
+  merchant: <span class="code-string">'Amazon.com'</span>,
+  amount: <span class="code-num">299.99</span>,
+  currency: <span class="code-string">'USD'</span>,
+  accountId: <span class="code-string">'acc_12345'</span>
+});
+
+console.<span class="code-func">log</span>(result.riskScore); <span class="code-comment">// 0.25</span>
+console.<span class="code-func">log</span>(result.confidence); <span class="code-comment">// 0.94</span></code></pre>
+        <pre id="code-py" style="display:none"><code><span class="code-comment"># Initialize the TUSK AI client</span>
+<span class="code-keyword">from</span> tusk_ai <span class="code-keyword">import</span> TuskAI
+
+client = <span class="code-func">TuskAI</span>(
+  api_key=<span class="code-string">"your_api_key_here"</span>,
+  environment=<span class="code-string">"production"</span>
+)
+
+<span class="code-comment"># Analyze a transaction</span>
+result = client.transactions.<span class="code-func">analyze</span>(
+  merchant=<span class="code-string">"Amazon.com"</span>,
+  amount=<span class="code-num">299.99</span>,
+  currency=<span class="code-string">"USD"</span>,
+  account_id=<span class="code-string">"acc_12345"</span>
+)
+
+<span class="code-func">print</span>(result.risk_score)  <span class="code-comment"># 0.25</span>
+<span class="code-func">print</span>(result.confidence)  <span class="code-comment"># 0.94</span></code></pre>
+        <pre id="code-java" style="display:none"><code><span class="code-comment">// Initialize the TUSK AI client</span>
+<span class="code-keyword">import</span> com.tusk.ai.TuskAIClient;
+<span class="code-keyword">import</span> com.tusk.ai.models.TransactionRequest;
+
+TuskAIClient client = <span class="code-keyword">new</span> <span class="code-func">TuskAIClient</span>()
+  .<span class="code-func">apiKey</span>(<span class="code-string">"your_api_key_here"</span>)
+  .<span class="code-func">environment</span>(<span class="code-string">"production"</span>)
+  .<span class="code-func">build</span>();
+
+TransactionRequest req = <span class="code-keyword">new</span> <span class="code-func">TransactionRequest</span>()
+  .<span class="code-func">merchant</span>(<span class="code-string">"Amazon.com"</span>)
+  .<span class="code-func">amount</span>(<span class="code-num">299.99</span>)
+  .<span class="code-func">currency</span>(<span class="code-string">"USD"</span>);
+<span class="code-keyword">var</span> result = client.transactions().<span class="code-func">analyze</span>(req);
+<span class="code-func">System</span>.out.println(result.getRiskScore());</code></pre>
+        <pre id="code-cs" style="display:none"><code><span class="code-comment">// Initialize the TUSK AI client</span>
+<span class="code-keyword">using</span> TuskAI;
+
+<span class="code-keyword">var</span> client = <span class="code-keyword">new</span> <span class="code-func">TuskAIClient</span>(<span class="code-keyword">new</span> <span class="code-func">TuskAIConfig</span> {
+  ApiKey = <span class="code-string">"your_api_key_here"</span>,
+  Environment = <span class="code-string">"production"</span>
+});
+
+<span class="code-keyword">var</span> result = <span class="code-keyword">await</span> client.Transactions.<span class="code-func">AnalyzeAsync</span>(<span class="code-keyword">new</span> {
+  Merchant = <span class="code-string">"Amazon.com"</span>,
+  Amount = <span class="code-num">299.99m</span>,
+  Currency = <span class="code-string">"USD"</span>
+});
+Console.<span class="code-func">WriteLine</span>(result.RiskScore);</code></pre>
+      </div>
+    </div>
+
+    <!-- API REFERENCE -->
+    <div class="docs-section">
+      <h2>API Reference</h2>
+      <div class="endpoint-grid">
+        <div class="endpoint-card">
+          <div><span class="method-badge method-post">POST</span><span class="endpoint-path">/v1/transactions/analyze</span></div>
+          <div class="endpoint-desc">Analyze a transaction for fraud risk. Returns risk score, confidence, and feature explanations.</div>
+        </div>
+        <div class="endpoint-card">
+          <div><span class="method-badge method-get">GET</span><span class="endpoint-path">/v1/transactions/{id}</span></div>
+          <div class="endpoint-desc">Retrieve a specific transaction analysis result by its unique ID.</div>
+        </div>
+        <div class="endpoint-card">
+          <div><span class="method-badge method-post">POST</span><span class="endpoint-path">/v1/assistant/chat</span></div>
+          <div class="endpoint-desc">Send a message to the RAGFlow-powered banking assistant and receive a context-aware response.</div>
+        </div>
+        <div class="endpoint-card">
+          <div><span class="method-badge method-get">GET</span><span class="endpoint-path">/v1/alerts</span></div>
+          <div class="endpoint-desc">List all fraud alerts. Supports filtering by severity, date range, and status.</div>
+        </div>
+        <div class="endpoint-card">
+          <div><span class="method-badge method-post">POST</span><span class="endpoint-path">/v1/alerts/{id}/resolve</span></div>
+          <div class="endpoint-desc">Mark an alert as resolved with optional resolution notes and action taken.</div>
+        </div>
+        <div class="endpoint-card">
+          <div><span class="method-badge method-get">GET</span><span class="endpoint-path">/v1/analytics/summary</span></div>
+          <div class="endpoint-desc">Get aggregated fraud detection statistics for a given time period.</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- SAMPLE RESPONSE -->
+    <div class="docs-section">
+      <h2>Sample Response</h2>
+      <div class="code-block"><pre><code>{
+  <span class="code-key">"id"</span>: <span class="code-string">"txn_9fKz2Mv8pQ"</span>,
+  <span class="code-key">"status"</span>: <span class="code-string">"analyzed"</span>,
+  <span class="code-key">"riskScore"</span>: <span class="code-num">0.25</span>,
+  <span class="code-key">"confidence"</span>: <span class="code-num">0.94</span>,
+  <span class="code-key">"processingTime"</span>: <span class="code-num">47</span>,
+  <span class="code-key">"verdict"</span>: <span class="code-string">"approve"</span>,
+  <span class="code-key">"models"</span>: [
+    { <span class="code-key">"name"</span>: <span class="code-string">"lstm_v3"</span>, <span class="code-key">"score"</span>: <span class="code-num">0.22</span> },
+    { <span class="code-key">"name"</span>: <span class="code-string">"random_forest"</span>, <span class="code-key">"score"</span>: <span class="code-num">0.28</span> },
+    { <span class="code-key">"name"</span>: <span class="code-string">"behavioral"</span>, <span class="code-key">"score"</span>: <span class="code-num">0.25</span> }
+  ],
+  <span class="code-key">"createdAt"</span>: <span class="code-string">"2025-03-26T08:51:00Z"</span>
+}</code></pre></div>
+    </div>
+  </main>
+</div>
+
+<footer class="footer"><div class="container"><div class="footer-grid"><div class="footer-brand"><div class="nav-logo" style="margin-bottom:0.75rem;"><div class="logo-icon">🐘</div><span>TUSK <span class="text-accent">AI</span></span></div><p>AI-powered fraud detection and banking intelligence.</p><div class="footer-social"><a href="#">𝕏</a><a href="#">in</a><a href="#">▶</a><a href="#">f</a></div></div><div class="footer-col"><h5>Products</h5><ul><li><a href="fraud-detection.html">Fraud Detection</a></li><li><a href="banking-assistant.html">Banking Assistant</a></li></ul></div><div class="footer-col"><h5>Company</h5><ul><li><a href="about.html">About Us</a></li><li><a href="pricing.html">Pricing</a></li><li><a href="contact.html">Contact</a></li></ul></div><div class="footer-col"><h5>Legal</h5><ul><li><a href="#">Privacy Policy</a></li><li><a href="#">Terms of Service</a></li></ul></div></div><div class="footer-bottom"><p>© 2025 TUSK AI Technologies. All rights reserved.</p><p>Innovation Hub, Block-A, Kalyanpur, Kanpur, UP, India</p></div></div></footer>
+<script src="js/main.js"></script>
+<script>
+function switchTab(lang, btn) {
+  ['js','py','java','cs'].forEach(l => { document.getElementById('code-'+l).style.display='none'; });
+  document.getElementById('code-'+lang).style.display='block';
+  document.querySelectorAll('.code-tab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+}
+</script>
+</body>
+</html>
