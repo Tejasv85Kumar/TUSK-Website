@@ -1,12 +1,12 @@
-# 🚀 TUSK: AI-Powered Fraud Detection System
+#  TUSK: AI-Powered Fraud Detection System
 
-## 📌 Project Overview
+##  Project Overview
 
 TUSK is an AI-powered fraud detection system designed to identify suspicious banking transactions in real-time. The system uses machine learning techniques to analyze transaction patterns and assign a **risk score** to each transaction, helping prevent financial fraud efficiently.
 
 ---
 
-## 🎯 Objectives
+##  Objectives
 
 * Detect fraudulent transactions using machine learning
 * Assign a **risk score (0 to 1)** for each transaction
@@ -15,17 +15,17 @@ TUSK is an AI-powered fraud detection system designed to identify suspicious ban
 
 ---
 
-## 🧠 Key Features
+##  Key Features
 
-* 🔍 Fraud Detection using ML models
-* 📊 Risk Scoring System (Low, Medium, High)
-* ⚡ Real-time transaction prediction (simulation)
-* 📈 Feature importance analysis
-* 💾 Model saving & reuse
+*  Fraud Detection using ML models
+*  Risk Scoring System (Low, Medium, High)
+*  Real-time transaction prediction (simulation)
+*  Feature importance analysis
+*  Model saving & reuse
 
 ---
 
-## 🗂️ Dataset
+##  Dataset
 
 The dataset is **synthetically generated** (due to privacy constraints of banking data).
 
@@ -49,9 +49,9 @@ The dataset is **synthetically generated** (due to privacy constraints of bankin
 
 ---
 
-## ⚙️ Tech Stack
+##  Tech Stack
 
-* Python 🐍
+* Python 
 * Pandas, NumPy
 * Scikit-learn
 * Matplotlib / Seaborn
@@ -59,7 +59,7 @@ The dataset is **synthetically generated** (due to privacy constraints of bankin
 
 ---
 
-## 🔄 Workflow
+##  Workflow
 
 ### 1. Data Preprocessing
 
@@ -100,7 +100,7 @@ Instead of only predicting fraud (0/1), the model outputs a probability:
 
 ---
 
-## 💻 Installation & Setup
+##  Installation & Setup
 
 ```bash
 # Clone the repository
@@ -115,7 +115,7 @@ pip install -r requirements.txt
 
 ---
 
-## ▶️ How to Run
+##  How to Run
 
 ```bash
 python main.py
@@ -129,16 +129,16 @@ jupyter notebook
 
 ---
 
-## 📊 Example Output
+##  Example Output
 
 ```python
 Transaction Risk Score: 0.87
-Risk Level: High Risk 🚨
+Risk Level: High Risk 
 ```
 
 ---
 
-## 💾 Model Saving
+##  Model Saving
 
 The trained model is saved using:
 
@@ -149,7 +149,7 @@ pickle.dump(model, open("fraud_model.pkl", "wb"))
 
 ---
 
-## ⚠️ Limitations
+##  Limitations
 
 * Uses synthetic dataset (not real banking data)
 * Real-time system is simulated
@@ -157,7 +157,7 @@ pickle.dump(model, open("fraud_model.pkl", "wb"))
 
 ---
 
-## 🚀 Future Scope
+##  Future Scope
 
 * Real-time API integration with banking systems
 * Advanced models (XGBoost, LSTM)
@@ -166,7 +166,7 @@ pickle.dump(model, open("fraud_model.pkl", "wb"))
 
 ---
 
-## 👨‍💻 Team Members
+##  Team Members
 
 * Tejasv Kumar
 * Utkarsh Sachan
