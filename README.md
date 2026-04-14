@@ -1,20 +1,181 @@
-**TUSK:AI-Powered Fraud Detection and Banking Assistance**
+# 🚀 TUSK: AI-Powered Fraud Detection System
 
-**Project Overview:**
-In today's fast-evolving digital economy, the rise of online banking, UPI payments, and mobile transactions has led to a dramatic increase in financial fraud, affecting both consumers and banks worldwide. Traditional fraud detection systems are often rule-based and reactive, flagging issues only after damage has occurred. Additionally, banks struggle to provide timely customer support, with users facing long wait times and inefficient dispute resolution processes.
+## 📌 Project Overview
 
-This project, AI-Powered Fraud Detection and Banking Assistance, aims to revolutionize the financial ecosystem by combining advanced machine learning with intelligent Natural Language Processing (NLP). It offers a two-in-one solution: real-time fraud detection and an AI-based chatbot for instant banking assistance.
+TUSK is an AI-powered fraud detection system designed to identify suspicious banking transactions in real-time. The system uses machine learning techniques to analyze transaction patterns and assign a **risk score** to each transaction, helping prevent financial fraud efficiently.
 
-**Project Objectives:**
+---
 
--> Develop an AI-powered fraud detection system: Use machine learning algorithms like Random Forest and LSTM to detect fraudulent transactions in real-time.
+## 🎯 Objectives
 
--> Build a smart AI-based banking assistant: Provide 24/7 support using NLP tools to help users report fraud, lock accounts, check balances, and view transaction history instantly.
+* Detect fraudulent transactions using machine learning
+* Assign a **risk score (0 to 1)** for each transaction
+* Simulate **real-time fraud detection**
+* Reduce false positives and improve detection accuracy
 
--> Deliver a unified response system: Automatically flag high-risk transactions and alert users immediately with instant resolution options.
+---
 
--> Ensure data security and compliance: Implement data encryption and maintain compliance with global standards such as GDPR, PCI-DSS, and RBI policies.
+## 🧠 Key Features
 
--> Enhance customer experience: Use AI to generate behavior-based alerts and proactive support to increase user trust and satisfaction.
+* 🔍 Fraud Detection using ML models
+* 📊 Risk Scoring System (Low, Medium, High)
+* ⚡ Real-time transaction prediction (simulation)
+* 📈 Feature importance analysis
+* 💾 Model saving & reuse
 
--> Reduce operational costs: Automate routine tasks to ease pressure on human agents and save banks time and money through intelligent security.
+---
+
+## 🗂️ Dataset
+
+The dataset is **synthetically generated** (due to privacy constraints of banking data).
+
+### Features Used:
+
+* transaction_id
+* customer_id
+* age
+* account_balance
+* transaction_amount
+* transaction_type
+* merchant_category
+* device_type
+* transaction_location
+* is_foreign_transaction
+* failed_attempts_last_24h
+* avg_transaction_amount
+* transaction_frequency_24h
+* amount_deviation
+* is_fraud (Target Variable)
+
+---
+
+## ⚙️ Tech Stack
+
+* Python 🐍
+* Pandas, NumPy
+* Scikit-learn
+* Matplotlib / Seaborn
+* Jupyter Notebook / VS Code
+
+---
+
+## 🔄 Workflow
+
+### 1. Data Preprocessing
+
+* Handling missing values
+* Encoding categorical variables
+* Feature scaling
+* Dropping unnecessary columns
+
+### 2. Model Training
+
+* Logistic Regression (Baseline)
+* Random Forest (Main Model)
+
+### 3. Model Evaluation
+
+* Accuracy
+* Precision
+* Recall
+* Confusion Matrix
+
+### 4. Risk Scoring System
+
+Instead of only predicting fraud (0/1), the model outputs a probability:
+
+| Score     | Risk Level  |
+| --------- | ----------- |
+| 0.0 – 0.3 | Low Risk    |
+| 0.3 – 0.7 | Medium Risk |
+| 0.7 – 1.0 | High Risk   |
+
+---
+
+## 🏦 Real-World Use Case
+
+* Low Risk → Allow transaction
+* Medium Risk → Request OTP verification
+* High Risk → Block transaction & alert user
+
+---
+
+## 💻 Installation & Setup
+
+```bash
+# Clone the repository
+git clone https://github.com/your-username/tusk-fraud-detection.git
+
+# Navigate to project folder
+cd tusk-fraud-detection
+
+# Install dependencies
+pip install -r requirements.txt
+```
+
+---
+
+## ▶️ How to Run
+
+```bash
+python main.py
+```
+
+Or run the Jupyter Notebook:
+
+```bash
+jupyter notebook
+```
+
+---
+
+## 📊 Example Output
+
+```python
+Transaction Risk Score: 0.87
+Risk Level: High Risk 🚨
+```
+
+---
+
+## 💾 Model Saving
+
+The trained model is saved using:
+
+```python
+import pickle
+pickle.dump(model, open("fraud_model.pkl", "wb"))
+```
+
+---
+
+## ⚠️ Limitations
+
+* Uses synthetic dataset (not real banking data)
+* Real-time system is simulated
+* No live API integration (yet)
+
+---
+
+## 🚀 Future Scope
+
+* Real-time API integration with banking systems
+* Advanced models (XGBoost, LSTM)
+* Dashboard for fraud monitoring
+* Integration with chatbot for user interaction
+
+---
+
+## 👨‍💻 Team Members
+
+* Tejasv Kumar
+* Utkarsh Sachan
+* Utkarsh Tiwari
+* Shikhar Shukla
+* Ayush Sachan
+
+---
+
+## 📜 License
+
+This project is for academic purposes only.
