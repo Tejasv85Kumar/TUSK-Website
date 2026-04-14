@@ -188,34 +188,205 @@
 
 <script src="js/main.js"></script>
 <script>
-const responses = {
-  default: [
-    "Based on our RAGFlow knowledge base, I can help you with that! Could you provide a bit more detail so I can give you the most accurate information?",
-    "Great question! Let me retrieve the relevant banking data for you. According to our records and guidelines, here's what you need to know...",
-    "I've analyzed your request using our AI models. Here's a comprehensive answer based on your account context and our banking policies."
-  ],
-  balance: "Your current account balance is **$12,450.00** (Savings) and **$3,280.50** (Checking). Your last transaction was a ₹2,499 credit on March 25th. Would you like a full statement?",
-  transaction: "Here are your last 5 transactions:\n• Amazon.com — $299.99 (Mar 24)\n• Starbucks — $6.45 (Mar 23)\n• Netflix — $15.99 (Mar 22)\n• Salary Credit — +$5,000.00 (Mar 21)\n• Electricity Bill — $89.00 (Mar 20)\n\nNeed more details on any transaction?",
-  fraud: "To report fraud immediately:\n1. **Call:** +91 98765-43210 (24/7 hotline)\n2. **Online:** Go to Account > Security > Report Fraud\n3. **I can block** your card right now — just say 'Block my card'\n\nYour account is being flagged for immediate review by our fraud team.",
-  atm: "Nearest ATMs to your registered address (Kanpur, UP):\n• TUSK Bank ATM — Civil Lines (0.3 km) ✅ Available\n• SBI ATM — Kidwai Nagar (0.8 km) ✅ Available\n• HDFC ATM — Harsh Nagar (1.2 km) ⚠ Low Cash\n\nAll are open 24/7.",
-  payment: "To set up automatic bill payments:\n1. Login → **Payments** → Auto-Pay\n2. Select payee (electric, phone, etc.)\n3. Set amount & due date\n4. Choose debit account\n5. Confirm with OTP\n\nAutomatic payments are processed at midnight on your chosen date. Would you like me to set one up now?",
+
+// ── TUSK AI Banking Chatbot Response Engine ───────────────────────────────────
+// Each entry maps a topic to a detailed, realistic banking response.
+// Uses keyword matching — most specific matches are checked first.
+
+const RESPONSES = {
+
+  balance: `Your current account balances are:<br><br>
+  💳 <strong>Savings Account</strong> — ₹1,02,450.00<br>
+  🏦 <strong>Current Account</strong> — ₹28,650.75<br>
+  💰 <strong>FD (Fixed Deposit)</strong> — ₹5,00,000.00 (matures June 30, 2025)<br><br>
+  Last transaction: <strong>₹2,499 credit</strong> on April 13th (Salary). Would you like a full mini-statement?`,
+
+  transaction: `Here are your last 5 transactions:<br><br>
+  📦 <strong>Amazon.in</strong> — ₹2,499.00 <span style="color:#EF4444;">Debit</span> (Apr 13)<br>
+  ☕ <strong>Starbucks</strong> — ₹480.00 <span style="color:#EF4444;">Debit</span> (Apr 12)<br>
+  🎬 <strong>Netflix</strong> — ₹649.00 <span style="color:#EF4444;">Debit</span> (Apr 11)<br>
+  💼 <strong>Salary Credit</strong> — ₹55,000.00 <span style="color:#10B981;">Credit</span> (Apr 10)<br>
+  💡 <strong>Electricity Bill</strong> — ₹1,240.00 <span style="color:#EF4444;">Debit</span> (Apr 9)<br><br>
+  Need the full statement or details on any transaction?`,
+
+  fraud: `🚨 <strong>To report fraud immediately:</strong><br><br>
+  1. <strong>Hotline:</strong> Call +91 98765-43210 (24/7)<br>
+  2. <strong>In-app:</strong> Account → Security → Report Fraud<br>
+  3. <strong>Block card instantly:</strong> Type <em>"Block my card"</em><br>
+  4. <strong>Email:</strong> fraud@tusk-ai.com<br><br>
+  ⚡ Our AI fraud team responds within <strong>2 minutes</strong>. Your account is being flagged for review. Do you want me to temporarily freeze all outgoing transactions?`,
+
+  atm: `📍 <strong>Nearest ATMs to Kalyanpur, Kanpur:</strong><br><br>
+  🏧 <strong>TUSK Bank ATM</strong> — Civil Lines (0.3 km) ✅ Operational<br>
+  🏧 <strong>SBI ATM</strong> — Kidwai Nagar (0.8 km) ✅ Operational<br>
+  🏧 <strong>HDFC ATM</strong> — Harsh Nagar (1.2 km) ⚠️ Low Cash<br>
+  🏧 <strong>Axis Bank ATM</strong> — Govind Nagar (1.6 km) ✅ Operational<br><br>
+  All ATMs are available 24/7. Withdrawal limit: <strong>₹25,000/day</strong>. Need directions?`,
+
+  payment: `💸 <strong>Setting up Automatic Bill Payments:</strong><br><br>
+  1. Login → <strong>Payments</strong> → <strong>Auto-Pay</strong><br>
+  2. Click <strong>"Add New Auto-Pay"</strong><br>
+  3. Select payee (electricity, phone, OTT, insurance, etc.)<br>
+  4. Enter amount & choose due date (1–28 of each month)<br>
+  5. Select debit account (Savings / Current)<br>
+  6. Confirm with <strong>OTP sent to your registered mobile</strong><br><br>
+  ✅ Payments process automatically at midnight on your chosen date. Want me to set one up now?`,
+
+  loan: `🏦 <strong>TUSK Bank — Current Loan Interest Rates:</strong><br><br>
+  🏠 <strong>Home Loan</strong> — Starting at <strong>8.40% p.a.</strong> (floating)<br>
+  🚗 <strong>Car Loan</strong> — Starting at <strong>9.25% p.a.</strong><br>
+  👤 <strong>Personal Loan</strong> — <strong>10.50% – 14.00% p.a.</strong><br>
+  🎓 <strong>Education Loan</strong> — Starting at <strong>8.15% p.a.</strong><br>
+  💼 <strong>Business Loan</strong> — <strong>11.00% – 16.00% p.a.</strong><br>
+  🌾 <strong>Agriculture Loan</strong> — Starting at <strong>7.00% p.a.</strong><br><br>
+  Rates valid as of April 2025 and are subject to RBI policy revisions. Would you like to apply or check eligibility?`,
+
+  password: `🔐 <strong>How to Update Your Password:</strong><br><br>
+  <strong>Online / Web App:</strong><br>
+  1. Login → click your <strong>Profile icon</strong> (top right)<br>
+  2. Go to <strong>Settings</strong> → <strong>Security & Privacy</strong><br>
+  3. Click <strong>"Change Password"</strong><br>
+  4. Enter your current password, then your new password (min 8 chars, 1 uppercase, 1 number, 1 special character)<br>
+  5. Confirm with <strong>OTP sent to your registered mobile/email</strong><br><br>
+  <strong>Mobile App:</strong> Profile → Security → Change Password<br><br>
+  ⚠️ If you've forgotten your password, click <strong>"Forgot Password"</strong> on the login screen and reset via OTP. Never share your password with anyone, including bank staff.`,
+
+  spending: `📊 <strong>Your Spending Analysis — April 2025:</strong><br><br>
+  🛍️ <strong>Shopping</strong> — ₹8,240 (31%) <span style="color:#EF4444;">▲ +12% vs last month</span><br>
+  🍕 <strong>Food & Dining</strong> — ₹3,890 (15%)<br>
+  🏠 <strong>Bills & Utilities</strong> — ₹5,120 (19%)<br>
+  🎬 <strong>Entertainment</strong> — ₹1,548 (6%)<br>
+  🚗 <strong>Transport</strong> — ₹2,100 (8%)<br>
+  💊 <strong>Healthcare</strong> — ₹800 (3%)<br>
+  💰 <strong>Savings</strong> — ₹5,000 (19%)<br><br>
+  💡 <strong>AI Insight:</strong> Your shopping spend is 12% above your 3-month average. Consider setting a monthly budget cap. Want me to set up a spending alert?`,
+
+  block: `🔒 <strong>Card Block Request Received.</strong><br><br>
+  To confirm: I will block <strong>all cards</strong> linked to your account:<br>
+  💳 TUSK Visa Debit — **** **** **** 4521<br>
+  💳 TUSK RuPay — **** **** **** 8832<br><br>
+  ✅ Type <strong>"YES BLOCK"</strong> to confirm, or <strong>"Cancel"</strong> to abort.<br><br>
+  You can re-activate any card from: Account → Cards → Activate, or by calling +91 98765-43210.`,
+
+  transfer: `💸 <strong>How to Transfer Money:</strong><br><br>
+  <strong>UPI (Instant, 24/7):</strong><br>
+  Payments → UPI → Enter UPI ID or scan QR → Enter amount → Confirm with PIN<br><br>
+  <strong>NEFT/RTGS (Bank Transfer):</strong><br>
+  Payments → Fund Transfer → Add Beneficiary → Enter IFSC + Account No. → Transfer<br><br>
+  <strong>Limits:</strong><br>
+  • UPI: ₹1,00,000 per transaction<br>
+  • NEFT: ₹10,00,000 per day (processed in batches)<br>
+  • RTGS: ₹2,00,000+ (real-time, 8 AM – 4:30 PM)<br><br>
+  Need help adding a new beneficiary?`,
+
+  statement: `📄 <strong>How to Download Your Account Statement:</strong><br><br>
+  1. Login → <strong>Accounts</strong> → Select account<br>
+  2. Click <strong>"Statements"</strong> → Choose date range<br>
+  3. Format: <strong>PDF</strong> or <strong>Excel</strong><br>
+  4. Statement is sent to your registered email within 2 minutes<br><br>
+  For <strong>Form 26AS</strong> (tax statement) or <strong>interest certificates</strong>, go to: Accounts → Tax Documents.<br><br>
+  Need a statement for a specific period?`,
+
+  insurance: `🛡️ <strong>TUSK Bank Insurance Products:</strong><br><br>
+  📋 <strong>Life Insurance</strong> — Term plans from ₹499/month (₹1 Cr cover)<br>
+  🏥 <strong>Health Insurance</strong> — Family floater from ₹799/month<br>
+  🚗 <strong>Vehicle Insurance</strong> — Comprehensive from ₹4,500/year<br>
+  🏠 <strong>Home Insurance</strong> — From ₹2,000/year<br><br>
+  All plans are available under your TUSK Bank account. Premium auto-debit available. Shall I connect you to an insurance advisor?`,
+
+  credit: `💳 <strong>Credit Card Services:</strong><br><br>
+  Your current credit card status:<br>
+  • <strong>TUSK Platinum Visa</strong> — Limit: ₹2,00,000 | Used: ₹45,320 | Available: ₹1,54,680<br>
+  • Due date: <strong>May 5, 2025</strong> | Minimum due: ₹2,267<br><br>
+  🎁 <strong>Reward Points:</strong> 4,850 points (worth ₹485)<br><br>
+  To increase your credit limit, go to Cards → Request Limit Increase. Need help with EMI conversion or bill payment?`,
+
+  upi: `📱 <strong>UPI Services:</strong><br><br>
+  Your registered UPI ID: <strong>yourname@tusk</strong><br><br>
+  <strong>Common UPI Actions:</strong><br>
+  • Send money: Payments → UPI → Send<br>
+  • Request money: Payments → UPI → Request<br>
+  • Scan & Pay: Tap scanner on home screen<br>
+  • UPI Limit: ₹1,00,000/transaction, ₹2,00,000/day<br><br>
+  ⚠️ Never share your UPI PIN with anyone — TUSK Bank will never ask for it. Any issues?`,
+
+  kyc: `📝 <strong>KYC (Know Your Customer) Update:</strong><br><br>
+  <strong>Required Documents:</strong><br>
+  • Identity Proof: Aadhaar / PAN / Passport / Voter ID<br>
+  • Address Proof: Aadhaar / Utility Bill / Rent Agreement<br><br>
+  <strong>How to update KYC:</strong><br>
+  1. Login → Profile → KYC Status<br>
+  2. Upload documents (PDF/JPG, max 2 MB each)<br>
+  3. Verify using Aadhaar-based eKYC (instant)<br><br>
+  ✅ eKYC via Aadhaar OTP takes less than 2 minutes. Need assistance?`,
+
+  nominee: `👨‍👩‍👧 <strong>Adding / Updating Nominee:</strong><br><br>
+  1. Login → <strong>Accounts</strong> → Select account → <strong>Nominee Details</strong><br>
+  2. Click <strong>"Add / Update Nominee"</strong><br>
+  3. Enter nominee's name, date of birth, relationship, and share (%)<br>
+  4. Upload nominee's ID proof<br>
+  5. Confirm with OTP<br><br>
+  ✅ You can add up to <strong>3 nominees</strong> per account. This is important for safety — please ensure your nominee details are up to date.`,
+
+  interest: `📈 <strong>Savings & Deposit Interest Rates:</strong><br><br>
+  💰 <strong>Savings Account</strong> — <strong>3.50% p.a.</strong> (quarterly compounding)<br>
+  📅 <strong>Fixed Deposit Rates (2025):</strong><br>
+  • 7–45 days: <strong>3.50%</strong><br>
+  • 46–179 days: <strong>5.25%</strong><br>
+  • 180–364 days: <strong>6.00%</strong><br>
+  • 1–2 years: <strong>6.80%</strong><br>
+  • 2–5 years: <strong>7.10%</strong><br>
+  • 5–10 years: <strong>7.25%</strong><br>
+  💡 Senior citizens get an additional <strong>0.50%</strong> on all FDs. Want to open an FD?`,
 };
+
+// ── Keyword Matching Map ───────────────────────────────────────────────────────
+const KEYWORD_MAP = [
+  { keys: ['balance', 'how much', 'account amount', 'funds'],           topic: 'balance'      },
+  { keys: ['transaction', 'recent', 'history', 'statement', 'last 5'], topic: 'transaction'  },
+  { keys: ['fraud', 'report fraud', 'suspicious', 'scam', 'stolen', 'unauthorized'], topic: 'fraud' },
+  { keys: ['atm', 'cash machine', 'withdraw', 'nearest atm'],           topic: 'atm'          },
+  { keys: ['bill pay', 'automatic', 'auto-pay', 'autopay', 'schedule payment'], topic: 'payment' },
+  { keys: ['loan', 'interest rate', 'home loan', 'car loan', 'personal loan', 'education loan', 'emi rate', 'borrow'], topic: 'loan' },
+  { keys: ['password', 'change password', 'update password', 'reset password', 'forgot password', 'login issue'], topic: 'password' },
+  { keys: ['spend', 'spending', 'expense', 'analyse', 'analyze', 'pattern', 'budget'], topic: 'spending' },
+  { keys: ['block card', 'freeze', 'lock card', 'block my card'],        topic: 'block'        },
+  { keys: ['transfer', 'send money', 'neft', 'rtgs', 'imps', 'fund transfer'], topic: 'transfer' },
+  { keys: ['bank statement', 'download statement', 'e-statement'],        topic: 'statement'    },
+  { keys: ['insurance', 'policy', 'cover', 'health plan', 'life cover'], topic: 'insurance'   },
+  { keys: ['credit card', 'credit limit', 'card bill', 'reward points', 'cashback'], topic: 'credit' },
+  { keys: ['upi', 'gpay', 'phonepe', 'paytm', 'scan pay', 'qr'],        topic: 'upi'          },
+  { keys: ['kyc', 'know your customer', 'document upload', 'verification'], topic: 'kyc'       },
+  { keys: ['nominee', 'beneficiary', 'add nominee'],                      topic: 'nominee'      },
+  { keys: ['savings rate', 'fd rate', 'fixed deposit', 'deposit rate', 'interest on savings'], topic: 'interest' },
+];
+
+// ── Fallback suggestions ───────────────────────────────────────────────────────
+const FALLBACK = `🤔 I didn't quite catch that. Here's what I can help you with:<br><br>
+💳 <strong>Account</strong> — balance, statement, transactions<br>
+🚨 <strong>Security</strong> — report fraud, block card, password change<br>
+🏦 <strong>Loans & Rates</strong> — loan interest rates, FD rates<br>
+💸 <strong>Payments</strong> — UPI, NEFT, auto-pay, fund transfer<br>
+📊 <strong>Insights</strong> — spending analysis, budget tips<br>
+📍 <strong>Nearby</strong> — ATM locator<br><br>
+Try typing one of the above or pick a command from the left sidebar. 😊`;
 
 function getResponse(msg) {
   const lower = msg.toLowerCase();
-  if (lower.includes('balance')) return responses.balance;
-  if (lower.includes('transaction') || lower.includes('recent') || lower.includes('history')) return responses.transaction;
-  if (lower.includes('fraud') || lower.includes('report')) return responses.fraud;
-  if (lower.includes('atm')) return responses.atm;
-  if (lower.includes('payment') || lower.includes('bill') || lower.includes('automatic')) return responses.payment;
-  return responses.default[Math.floor(Math.random() * responses.default.length)];
+  for (const { keys, topic } of KEYWORD_MAP) {
+    if (keys.some(k => lower.includes(k))) {
+      return RESPONSES[topic];
+    }
+  }
+  return FALLBACK;
 }
 
+// ── Message rendering ─────────────────────────────────────────────────────────
 function addMessage(text, type) {
   const container = document.getElementById('chatMessages');
   const div = document.createElement('div');
   div.className = `msg msg-${type}`;
-  const now = new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+  const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
   div.innerHTML = `<div class="msg-bubble">${text.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>')}</div><div class="msg-time">${now}</div>`;
   container.appendChild(div);
   container.scrollTop = container.scrollHeight;
@@ -239,7 +410,7 @@ function removeTyping() {
 function sendMessage(text) {
   addMessage(text, 'user');
   showTyping();
-  const delay = 900 + Math.random() * 600;
+  const delay = 800 + Math.random() * 500;
   setTimeout(() => {
     removeTyping();
     addMessage(getResponse(text), 'bot');
@@ -256,3 +427,4 @@ function sendFromInput() {
 </script>
 </body>
 </html>
+

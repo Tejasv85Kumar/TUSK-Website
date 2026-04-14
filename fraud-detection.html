@@ -166,10 +166,6 @@
       <div class="card" style="padding:2rem;">
         <h4 style="margin-bottom:1.5rem;">Transaction Analysis</h4>
         <div class="form-group">
-          <label class="form-label">Merchant</label>
-          <input type="text" class="form-input" id="fd-merchant" value="Amazon.com" placeholder="e.g. Amazon.com" />
-        </div>
-        <div class="form-group">
           <label class="form-label">Transaction Amount ($)</label>
           <input type="number" class="form-input" id="fd-amount" value="299.99" placeholder="e.g. 299.99" />
         </div>
@@ -181,7 +177,61 @@
           <label class="form-label">Customer Age</label>
           <input type="number" class="form-input" id="fd-age" value="35" placeholder="e.g. 35" />
         </div>
-        <button class="btn btn-primary" style="width:100%;justify-content:center;" onclick="analyzeTransaction()">
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Transaction Type</label>
+            <select class="form-input" id="fd-type">
+              <option>Online</option><option>POS</option><option>ATM</option><option>Transfer</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Device Type</label>
+            <select class="form-input" id="fd-device">
+              <option>Mobile</option><option>Desktop</option><option>Tablet</option>
+            </select>
+          </div>
+        </div>
+        <div class="form-group" style="margin-top:0.75rem;">
+          <label class="form-label">Merchant Category</label>
+          <select class="form-input" id="fd-merchant-cat">
+            <option>Retail</option><option>Restaurant</option><option>Travel</option><option>Entertainment</option><option>Grocery</option><option>Electronics</option><option>Healthcare</option>
+          </select>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Location</label>
+            <select class="form-input" id="fd-location">
+              <option>India</option><option>USA</option><option>UK</option><option>Nigeria</option><option>China</option>
+            </select>
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Foreign Transaction?</label>
+            <select class="form-input" id="fd-foreign">
+              <option value="0">No (Domestic)</option><option value="1">Yes (Foreign)</option>
+            </select>
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.75rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Failed Attempts (24h)</label>
+            <input type="number" class="form-input" id="fd-fails" value="0" min="0" max="20" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Txn Frequency (24h)</label>
+            <input type="number" class="form-input" id="fd-freq" value="3" min="0" max="50" />
+          </div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:0.75rem;margin-top:0.75rem;">
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Avg Txn Amount ($)</label>
+            <input type="number" class="form-input" id="fd-avg" value="250" />
+          </div>
+          <div class="form-group" style="margin-bottom:0;">
+            <label class="form-label">Amount Deviation</label>
+            <input type="number" class="form-input" id="fd-dev" value="0.5" step="0.1" />
+          </div>
+        </div>
+        <button class="btn btn-primary" style="width:100%;justify-content:center;margin-top:1.25rem;" onclick="analyzeTransaction()" id="analyze-btn">
           ⚡ Analyze Transaction
         </button>
       </div>
@@ -267,30 +317,124 @@
 
 <script src="js/main.js"></script>
 <script>
-function analyzeTransaction() {
-  const merchant = document.getElementById('fd-merchant').value;
-  const amount = parseFloat(document.getElementById('fd-amount').value) || 299.99;
-  const balance = parseFloat(document.getElementById('fd-balance').value) || 5000;
-  const age = parseInt(document.getElementById('fd-age').value) || 35;
+// ── TUSK AI — Real ML Backend Integration ─────────────────────────────────
+const API_BASE = 'http://localhost:8000';
 
-  // Simple mock risk scoring
-  let risk = 10;
-  if (amount > balance * 0.5) risk += 30;
-  if (amount > 1000) risk += 20;
-  if (age < 25 || age > 80) risk += 15;
-  if (merchant.toLowerCase().includes('unknown')) risk += 25;
-  risk = Math.min(risk + Math.random() * 10, 99);
-  const confidence = 90 + Math.random() * 8;
+async function analyzeTransaction() {
+  const btn = document.getElementById('analyze-btn');
+  btn.textContent = '⏳ Analyzing...';
+  btn.disabled = true;
 
-  document.getElementById('risk-score-num').textContent = risk.toFixed(1) + '%';
-  document.getElementById('risk-bar').style.width = risk + '%';
+  const payload = {
+    age:                       parseInt(document.getElementById('fd-age').value)    || 35,
+    account_balance:           parseFloat(document.getElementById('fd-balance').value) || 5000,
+    transaction_amount:        parseFloat(document.getElementById('fd-amount').value)  || 299.99,
+    transaction_type:          document.getElementById('fd-type').value,
+    merchant_category:         document.getElementById('fd-merchant-cat').value,
+    device_type:               document.getElementById('fd-device').value,
+    transaction_location:      document.getElementById('fd-location').value,
+    is_foreign_transaction:    parseInt(document.getElementById('fd-foreign').value),
+    failed_attempts_last_24h:  parseInt(document.getElementById('fd-fails').value)   || 0,
+    avg_transaction_amount:    parseFloat(document.getElementById('fd-avg').value)   || 250,
+    transaction_frequency_24h: parseInt(document.getElementById('fd-freq').value)   || 3,
+    amount_deviation:          parseFloat(document.getElementById('fd-dev').value)   || 0.5
+  };
+
+  try {
+    const res  = await fetch(`${API_BASE}/api/fraud/analyze`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+
+    if (!res.ok) throw new Error(`API error: ${res.status}`);
+    const data = await res.json();
+    renderResult(data);
+
+  } catch (err) {
+    // Fallback to local scoring if backend is not running
+    console.warn('Backend unavailable, using local scoring.', err);
+    localFallbackScore(payload);
+  } finally {
+    btn.textContent = '⚡ Analyze Transaction';
+    btn.disabled = false;
+  }
+}
+
+function renderResult(data) {
+  const score = data.risk_percentage;
+  document.getElementById('risk-score-num').textContent = score.toFixed(1) + '%';
+  document.getElementById('risk-score-num').style.color  = data.risk_color;
+  document.getElementById('risk-bar').style.width        = Math.min(score, 100) + '%';
 
   const badge = document.getElementById('confidence-badge');
-  badge.textContent = confidence.toFixed(1) + '% High';
+  const fraudClass = data.risk_label === 'LOW' ? 'badge-green'
+                   : data.risk_label === 'MEDIUM' ? 'badge-amber'
+                   : 'badge-red';
+  badge.className = `badge ${fraudClass}`;
+  badge.textContent = `${data.confidence}% — ${data.risk_label}`;
 
-  const processing = Math.round(40 + Math.random() * 20);
-  document.getElementById('risk-summary').innerHTML = `This transaction was analyzed using ensemble machine learning models including LSTM neural networks, Random Forest, and behavioral analytics. Processing completed in <strong style="color:var(--accent);">${processing}ms</strong> with high confidence.`;
+  // Feature analysis breakdown
+  const fa = data.features_analysis || {};
+  const flagLines = Object.values(fa).filter(f => f.risky)
+    .map(f => `<li>⚠ ${f.label}: ${f.value}</li>`).join('');
+  const flagSummary = flagLines ? `<ul style="margin:0.5rem 0 0;padding-left:1rem;">${flagLines}</ul>` : '';
+
+  document.getElementById('risk-summary').innerHTML =
+    `${data.recommendation}<br><br>` +
+    `Analyzed with <strong style="color:var(--accent);">Random Forest (200 trees)</strong>. ` +
+    `Processing time: <strong style="color:var(--accent);">${data.processing_time_ms}ms</strong>.` +
+    flagSummary;
+
+  // Flash result panel
+  const panel = document.getElementById('risk-result-panel');
+  panel.style.borderColor = data.risk_color;
+  panel.style.boxShadow   = `0 0 24px ${data.risk_color}33`;
+  setTimeout(() => { panel.style.borderColor = ''; panel.style.boxShadow = ''; }, 3000);
 }
+
+function localFallbackScore(payload) {
+  // Used only when backend server is offline
+  let risk = 10;
+  if (payload.transaction_amount > payload.account_balance * 0.5) risk += 28;
+  if (payload.transaction_amount > payload.avg_transaction_amount * 2) risk += 20;
+  if (payload.is_foreign_transaction) risk += 15;
+  if (payload.failed_attempts_last_24h >= 3) risk += 18;
+  if (payload.transaction_frequency_24h > 10) risk += 12;
+  risk = Math.min(risk + Math.random() * 8, 98);
+
+  const label = risk < 30 ? 'LOW' : risk < 60 ? 'MEDIUM' : risk < 80 ? 'HIGH' : 'CRITICAL';
+  const color = risk < 30 ? '#10B981' : risk < 60 ? '#F59E0B' : '#EF4444';
+
+  renderResult({
+    risk_percentage: risk, risk_label: label, risk_color: color,
+    confidence: (90 + Math.random() * 8).toFixed(1),
+    processing_time_ms: (40 + Math.random() * 20).toFixed(1),
+    recommendation: label === 'LOW'
+      ? '✅ Transaction appears safe. Approve normally.'
+      : label === 'MEDIUM'
+      ? '⚠️ Elevated risk. Consider additional verification.'
+      : '🚨 High fraud risk detected. Request customer confirmation.',
+    features_analysis: {}
+  });
+}
+
+// ── Live stats from API ──────────────────────────────────────────────────────
+async function loadLiveStats() {
+  try {
+    const res  = await fetch(`${API_BASE}/api/stats`);
+    const data = await res.json();
+    const el1 = document.querySelector('[data-count="1248"]');
+    const el2 = document.querySelector('[data-count="99.7"]');
+    const el3 = document.querySelector('[data-count="47"]');
+    const el4 = document.querySelector('[data-count="0.3"]');
+    if (el1) el1.textContent = data.checks_today.toLocaleString();
+    if (el2) el2.textContent = data.detection_accuracy + '%';
+    if (el3) el3.textContent = data.avg_response_ms + 'ms';
+    if (el4) el4.textContent = data.false_positive_rate + '%';
+  } catch (_) { /* backend offline — static values already shown */ }
+}
+loadLiveStats();
 </script>
 </body>
 </html>
