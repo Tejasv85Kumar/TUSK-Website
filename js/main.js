@@ -117,3 +117,55 @@ startLiveTicker('#ticker-threats', 9854, 2, 4000);
 
 console.log('%cTUSK AI Platform', 'color:#10B981;font-size:1.5rem;font-weight:800;');
 console.log('%cInitialized successfully.', 'color:#64748B');
+
+// ── User Session: Swap "Sign In" for logged-in user name ──────────────────────
+(function initUserSession() {
+  const userName = localStorage.getItem('tusk_user');
+  if (!userName) return; // not logged in — show Sign In as normal
+
+  // Find and replace all Sign In links in nav-actions and mobile-menu
+  document.querySelectorAll('a[href="auth.html"].btn-outline, a[href="auth.html"]').forEach(link => {
+    if (link.textContent.trim() === 'Sign In') {
+      // Replace with user avatar button
+      const initials = userName.slice(0, 2).toUpperCase();
+      const wrapper = document.createElement('div');
+      wrapper.className = 'user-menu-wrap';
+      wrapper.innerHTML = `
+        <button class="user-avatar-btn" id="userMenuBtn" aria-label="User menu">
+          <span class="user-avatar-icon">${initials}</span>
+          <span class="user-name-label">${userName}</span>
+          <span style="font-size:0.65rem;opacity:0.7;">▾</span>
+        </button>
+        <div class="user-dropdown" id="userDropdown">
+          <div class="user-dropdown-header">
+            <div class="user-avatar-icon lg">${initials}</div>
+            <div>
+              <div class="user-dropdown-name">${userName}</div>
+              <div class="user-dropdown-role">Administrator</div>
+            </div>
+          </div>
+          <div class="user-dropdown-divider"></div>
+          <a href="index.html" class="user-dropdown-item">🏠 Dashboard</a>
+          <a href="fraud-detection.html" class="user-dropdown-item">🔍 Fraud Detection</a>
+          <a href="banking-assistant.html" class="user-dropdown-item">🤖 Banking Assistant</a>
+          <div class="user-dropdown-divider"></div>
+          <button class="user-dropdown-item logout-btn" onclick="logoutUser()">🚪 Sign Out</button>
+        </div>`;
+      link.replaceWith(wrapper);
+
+      // Toggle dropdown
+      const btn = wrapper.querySelector('#userMenuBtn');
+      const dd  = wrapper.querySelector('#userDropdown');
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        dd.classList.toggle('open');
+      });
+      document.addEventListener('click', () => dd.classList.remove('open'));
+    }
+  });
+})();
+
+function logoutUser() {
+  localStorage.removeItem('tusk_user');
+  window.location.href = 'auth.html';
+}

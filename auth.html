@@ -153,12 +153,30 @@ function selectClearance(el) {
 function handleAuth(e, msg) {
   e.preventDefault();
   const btn = e.target.querySelector('button[type=submit]');
+
+  // Determine which panel is active and extract user name
+  const isRegister = document.getElementById('panel-register').classList.contains('active');
+  let userName = 'Admin';
+  if (isRegister) {
+    const nameInput = document.querySelector('#panel-register input[type="text"]');
+    if (nameInput && nameInput.value.trim()) {
+      userName = nameInput.value.trim().split(' ')[0];
+    }
+  } else {
+    const emailInput = document.querySelector('#panel-signin input[type="email"]');
+    if (emailInput && emailInput.value.trim()) {
+      const prefix = emailInput.value.trim().split('@')[0];
+      userName = prefix.charAt(0).toUpperCase() + prefix.slice(1);
+    }
+  }
+
   btn.textContent = 'Processing...';
   btn.disabled = true;
   setTimeout(() => {
     btn.textContent = '✅ ' + msg + '!';
     btn.style.background = 'rgba(16,185,129,0.2)';
     btn.style.color = 'var(--accent)';
+    localStorage.setItem('tusk_user', userName);
     setTimeout(() => window.location.href = 'index.html', 1500);
   }, 1200);
 }

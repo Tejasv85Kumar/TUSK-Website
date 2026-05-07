@@ -42,6 +42,21 @@
     .chart-bar.highlight { background:var(--accent) !important; }
 
     @media(max-width:768px) { .fd-product-cards { grid-template-columns:repeat(2,1fr); } .status-bar-grid { grid-template-columns:1fr 1fr; } .algo-grid,.analysis-grid { grid-template-columns:1fr; } }
+
+    /* AI Reasoning Panel */
+    .reason-section { margin-top:1.25rem; }
+    .reason-title { font-size:0.78rem; font-weight:700; text-transform:uppercase; letter-spacing:0.08em; color:var(--text-muted); margin-bottom:0.6rem; }
+    .reason-item { display:flex; align-items:center; gap:0.6rem; padding:0.55rem 0.75rem; border-radius:var(--radius-sm); margin-bottom:0.4rem; font-size:0.8rem; border:1px solid; }
+    .reason-item.ok   { background:rgba(16,185,129,0.06); border-color:rgba(16,185,129,0.2); color:#6ee7b7; }
+    .reason-item.warn { background:rgba(245,158,11,0.06); border-color:rgba(245,158,11,0.25); color:#fcd34d; }
+    .reason-item.bad  { background:rgba(239,68,68,0.06);  border-color:rgba(239,68,68,0.2);  color:#fca5a5; }
+    .reason-item .ri-label { flex:1; color:var(--text-secondary); }
+    .reason-item .ri-val   { font-weight:600; }
+    .verdict-banner { display:flex; align-items:center; gap:0.75rem; padding:0.85rem 1rem; border-radius:var(--radius-md); margin-bottom:1.25rem; border:1.5px solid; font-size:0.875rem; font-weight:600; }
+    .verdict-banner.safe     { background:rgba(16,185,129,0.08); border-color:rgba(16,185,129,0.3); color:#6ee7b7; }
+    .verdict-banner.risky    { background:rgba(245,158,11,0.08); border-color:rgba(245,158,11,0.3); color:#fcd34d; }
+    .verdict-banner.fraud    { background:rgba(239,68,68,0.08);  border-color:rgba(239,68,68,0.3);  color:#fca5a5; }
+    .verdict-icon { font-size:1.3rem; }
   </style>
 </head>
 <body>
@@ -249,13 +264,22 @@
           <span style="font-size:0.85rem;color:var(--text-muted);">Confidence Level</span>
           <span class="badge badge-green" id="confidence-badge">94.0% High</span>
         </div>
-        <div style="padding:1rem;background:rgba(16,185,129,0.05);border:1px solid var(--border-accent);border-radius:var(--radius-sm);font-size:0.8rem;color:var(--text-muted);line-height:1.7;" id="risk-summary">
-          This transaction was analyzed using ensemble machine learning models including LSTM neural networks, Random Forest, and behavioral analytics. Processing completed in <strong style="color:var(--accent);">47ms</strong> with high confidence.
+        <!-- Verdict Banner -->
+        <div class="verdict-banner safe" id="verdict-banner">
+          <span class="verdict-icon">✅</span>
+          <span id="verdict-text">Transaction appears safe. Approve normally.</span>
+        </div>
+        <!-- AI Reasoning Breakdown -->
+        <div class="reason-section" id="reason-section">
+          <div class="reason-title">🔍 Why this verdict?</div>
+          <div id="reason-list">
+            <div class="reason-item ok"><span>✓</span><span class="ri-label">Awaiting analysis...</span></div>
+          </div>
         </div>
         <div style="display:flex;gap:0.5rem;margin-top:1rem;font-size:0.75rem;flex-wrap:wrap;">
           <span class="badge badge-green">✓ LSTM Neural Net</span>
-          <span class="badge badge-green">✓ Random Forest</span>
-          <span class="badge badge-blue">✓ Behavioral Model</span>
+          <span class="badge badge-green" id="model-badge">✓ Random Forest</span>
+          <span class="badge badge-blue" id="time-badge">⏱ 47ms</span>
         </div>
       </div>
     </div>
@@ -374,17 +398,32 @@ function renderResult(data) {
   badge.className = `badge ${fraudClass}`;
   badge.textContent = `${data.confidence}% — ${data.risk_label}`;
 
-  // Feature analysis breakdown
-  const fa = data.features_analysis || {};
-  const flagLines = Object.values(fa).filter(f => f.risky)
-    .map(f => `<li>⚠ ${f.label}: ${f.value}</li>`).join('');
-  const flagSummary = flagLines ? `<ul style="margin:0.5rem 0 0;padding-left:1rem;">${flagLines}</ul>` : '';
+  // ── Verdict banner ──────────────────────────────────────────────────────────
+  const banner = document.getElementById('verdict-banner');
+  const verdictText = document.getElementById('verdict-text');
+  if (data.risk_label === 'LOW') {
+    banner.className = 'verdict-banner safe';
+    verdictText.innerHTML = `✅ <strong>Transaction Approved</strong> — No significant fraud signals detected. This transaction matches normal spending behaviour.`;
+  } else if (data.risk_label === 'MEDIUM') {
+    banner.className = 'verdict-banner risky';
+    verdictText.innerHTML = `⚠️ <strong>Caution Advised</strong> — Elevated risk signals found. Additional verification is recommended before approving.`;
+  } else {
+    banner.className = 'verdict-banner fraud';
+    verdictText.innerHTML = `🚨 <strong>Likely Fraud</strong> — Multiple high-risk signals detected. This transaction should be blocked and reviewed immediately.`;
+  }
 
-  document.getElementById('risk-summary').innerHTML =
-    `${data.recommendation}<br><br>` +
-    `Analyzed with <strong style="color:var(--accent);">Random Forest (200 trees)</strong>. ` +
-    `Processing time: <strong style="color:var(--accent);">${data.processing_time_ms}ms</strong>.` +
-    flagSummary;
+  // ── AI Reasoning breakdown ──────────────────────────────────────────────────
+  const fa = data.features_analysis || {};
+  const reasons = buildReasons(data, fa);
+  document.getElementById('reason-list').innerHTML = reasons.map(r => {
+    const cls = r.type === 'ok' ? 'ok' : r.type === 'warn' ? 'warn' : 'bad';
+    const icon = r.type === 'ok' ? '✓' : r.type === 'warn' ? '⚠' : '✗';
+    return `<div class="reason-item ${cls}"><span>${icon}</span><span class="ri-label">${r.label}</span><span class="ri-val">${r.value}</span></div>`;
+  }).join('');
+
+  // ── Badges ──────────────────────────────────────────────────────────────────
+  document.getElementById('model-badge').textContent  = `✓ ${data.model_used || 'Random Forest'}`;
+  document.getElementById('time-badge').textContent   = `⏱ ${data.processing_time_ms}ms`;
 
   // Flash result panel
   const panel = document.getElementById('risk-result-panel');
@@ -393,16 +432,119 @@ function renderResult(data) {
   setTimeout(() => { panel.style.borderColor = ''; panel.style.boxShadow = ''; }, 3000);
 }
 
+// ── Build human-readable reasons from features_analysis + raw data ─────────────
+function buildReasons(data, fa) {
+  const reasons = [];
+  const score   = data.risk_percentage;
+
+  // Overall risk level reason
+  if (score < 30) {
+    reasons.push({ type:'ok',   label:'Overall risk score is low',              value: score.toFixed(1)+'%' });
+  } else if (score < 60) {
+    reasons.push({ type:'warn', label:'Moderate risk score detected',           value: score.toFixed(1)+'%' });
+  } else {
+    reasons.push({ type:'bad',  label:'High risk score — fraud likely',         value: score.toFixed(1)+'%' });
+  }
+
+  // Feature-specific reasons from backend features_analysis
+  const labelMap = {
+    account_balance:          { label:'Account balance',           fmt: v => `$${Number(v).toLocaleString()}` },
+    transaction_amount:       { label:'Transaction amount',        fmt: v => `$${Number(v).toLocaleString()}` },
+    amount_deviation:         { label:'Amount deviation score',    fmt: v => v },
+    failed_attempts:          { label:'Failed login attempts (24h)', fmt: v => `${v} attempt(s)` },
+    transaction_frequency:    { label:'Transaction frequency (24h)', fmt: v => `${v} txns` },
+    high_amount_flag:         { label:'Unusually high amount',     fmt: v => v > 0 ? 'Yes' : 'No' },
+    is_foreign_transaction:   { label:'Foreign transaction',       fmt: v => v ? 'Yes' : 'No' },
+  };
+
+  for (const [key, feature] of Object.entries(fa)) {
+    const risky = feature.risky;
+    const val   = feature.value;
+    const lbl   = feature.label || (labelMap[key] ? labelMap[key].label : key);
+    if (risky) {
+      // Specific human reason for each risky flag
+      let reason = '';
+      if (key === 'transaction_amount')   reason = `Amount $${val} is unusually high for this account`;
+      else if (key === 'account_balance') reason = `Low balance ($${val}) relative to transaction size`;
+      else if (key === 'amount_deviation') reason = `Amount deviates significantly from spending pattern`;
+      else if (key === 'failed_attempts' || key === 'failed_attempts_last_24h') reason = `${val} failed login attempt(s) in last 24h — suspicious activity`;
+      else if (key === 'transaction_frequency' || key === 'transaction_frequency_24h') reason = `High transaction frequency (${val}) may indicate account takeover`;
+      else if (key === 'high_amount_flag') reason = `Transaction amount is 2x above average spending`;
+      else if (key === 'is_foreign_transaction') reason = `Foreign transaction detected — unusual for this account`;
+      else reason = `${lbl}: ${val} flagged as risky`;
+      reasons.push({ type: score >= 60 ? 'bad' : 'warn', label: reason, value: '⚠ Flagged' });
+    } else {
+      reasons.push({ type:'ok', label:`${lbl} within normal range`, value: `${val} ✔` });
+    }
+  }
+
+  // If no features came back from backend, add generic safe reasons
+  if (Object.keys(fa).length === 0 && score < 30) {
+    reasons.push({ type:'ok', label:'Transaction amount within normal range',    value:'✔ Safe' });
+    reasons.push({ type:'ok', label:'No failed login attempts detected',         value:'✔ Safe' });
+    reasons.push({ type:'ok', label:'Transaction frequency is normal',           value:'✔ Safe' });
+    reasons.push({ type:'ok', label:'Domestic transaction — no geo anomaly',    value:'✔ Safe' });
+  }
+
+  return reasons;
+}
+
 function localFallbackScore(payload) {
   // Used only when backend server is offline
   let risk = 10;
-  if (payload.transaction_amount > payload.account_balance * 0.5) risk += 28;
-  if (payload.transaction_amount > payload.avg_transaction_amount * 2) risk += 20;
-  if (payload.is_foreign_transaction) risk += 15;
-  if (payload.failed_attempts_last_24h >= 3) risk += 18;
-  if (payload.transaction_frequency_24h > 10) risk += 12;
-  risk = Math.min(risk + Math.random() * 8, 98);
+  const fa = {};
 
+  // Evaluate each factor and build features_analysis
+  const amtRatio = payload.account_balance > 0 ? payload.transaction_amount / payload.account_balance : 0;
+  const isHighAmt = payload.transaction_amount > payload.avg_transaction_amount * 2;
+  const isHighFreq = payload.transaction_frequency_24h > 10;
+  const isHighDev  = payload.amount_deviation > 5;
+  const isHighFails = payload.failed_attempts_last_24h >= 3;
+  const isForeign  = !!payload.is_foreign_transaction;
+
+  fa.transaction_amount = {
+    value: payload.transaction_amount.toFixed(2),
+    label: 'Transaction Amount',
+    risky: amtRatio > 0.5
+  };
+  if (amtRatio > 0.5) risk += 28;
+
+  fa.high_amount_flag = {
+    value: isHighAmt ? 'Yes' : 'No',
+    label: 'Amount vs Average Spend',
+    risky: isHighAmt
+  };
+  if (isHighAmt) risk += 20;
+
+  fa.is_foreign_transaction = {
+    value: isForeign ? 'Yes (Foreign)' : 'No (Domestic)',
+    label: 'Foreign Transaction',
+    risky: isForeign
+  };
+  if (isForeign) risk += 15;
+
+  fa.failed_attempts_last_24h = {
+    value: payload.failed_attempts_last_24h,
+    label: 'Failed Login Attempts (24h)',
+    risky: isHighFails
+  };
+  if (isHighFails) risk += 18;
+
+  fa.transaction_frequency_24h = {
+    value: payload.transaction_frequency_24h,
+    label: 'Transaction Frequency (24h)',
+    risky: isHighFreq
+  };
+  if (isHighFreq) risk += 12;
+
+  fa.amount_deviation = {
+    value: payload.amount_deviation,
+    label: 'Amount Deviation Score',
+    risky: isHighDev
+  };
+  if (isHighDev) risk += 8;
+
+  risk = Math.min(risk + Math.random() * 6, 98);
   const label = risk < 30 ? 'LOW' : risk < 60 ? 'MEDIUM' : risk < 80 ? 'HIGH' : 'CRITICAL';
   const color = risk < 30 ? '#10B981' : risk < 60 ? '#F59E0B' : '#EF4444';
 
@@ -410,12 +552,13 @@ function localFallbackScore(payload) {
     risk_percentage: risk, risk_label: label, risk_color: color,
     confidence: (90 + Math.random() * 8).toFixed(1),
     processing_time_ms: (40 + Math.random() * 20).toFixed(1),
+    model_used: 'Local Scoring Engine',
     recommendation: label === 'LOW'
-      ? '✅ Transaction appears safe. Approve normally.'
+      ? '✅ Transaction appears safe. No significant fraud signals detected.'
       : label === 'MEDIUM'
-      ? '⚠️ Elevated risk. Consider additional verification.'
-      : '🚨 High fraud risk detected. Request customer confirmation.',
-    features_analysis: {}
+      ? '⚠️ Elevated risk. Consider additional verification before approving.'
+      : '🚨 High fraud risk detected. Block transaction and request customer confirmation.',
+    features_analysis: fa
   });
 }
 

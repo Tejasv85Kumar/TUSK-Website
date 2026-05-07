@@ -53,6 +53,15 @@
     .typing-dot:nth-child(2) { animation-delay:0.2s; }
     .typing-dot:nth-child(3) { animation-delay:0.4s; }
     @keyframes typing-bounce { 0%,80%,100%{transform:translateY(0)} 40%{transform:translateY(-6px)} }
+    .chat-action-btns { display:flex;gap:0.5rem;flex-wrap:wrap;margin-top:0.85rem; }
+    .chat-action-btn { padding:0.45rem 1rem;border-radius:999px;border:1.5px solid;font-size:0.78rem;font-weight:600;cursor:pointer;transition:all 0.2s; }
+    .chat-action-btn.danger  { background:rgba(239,68,68,0.12);border-color:#EF4444;color:#EF4444; }
+    .chat-action-btn.danger:hover  { background:#EF4444;color:#fff; }
+    .chat-action-btn.success { background:rgba(16,185,129,0.12);border-color:var(--accent);color:var(--accent); }
+    .chat-action-btn.success:hover { background:var(--accent);color:#000; }
+    .chat-action-btn.neutral { background:var(--bg-secondary);border-color:var(--border);color:var(--text-secondary); }
+    .chat-action-btn.neutral:hover { border-color:var(--border-accent);color:var(--text-primary); }
+    .chat-action-btn:disabled { opacity:0.4;cursor:not-allowed; }
 
     @media(max-width:768px) { .ba-stats{grid-template-columns:1fr 1fr;} .chat-layout{grid-template-columns:1fr;} .commands-sidebar{position:static;} }
   </style>
@@ -109,11 +118,11 @@
         <h4>Commands to Try</h4>
         <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">💳 Check my account balance</div>
         <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">📋 Show recent transactions</div>
-        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">🚨 How do I report fraud?</div>
+        <div class="cmd-item" onclick="startFraudReport()">🚨 Report Fraud</div>
+        <div class="cmd-item" onclick="startBlockCard()">🔒 Block My Card</div>
         <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">📍 Find nearby ATM</div>
         <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">💸 How to set up automatic bill payments</div>
         <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">🏦 What are the loan interest rates?</div>
-        <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">🔐 How to update my password?</div>
         <div class="cmd-item" onclick="sendMessage(this.textContent.trim())">📊 Analyze my spending patterns</div>
       </div>
 
@@ -141,10 +150,11 @@
         </div>
 
         <div class="quick-actions-row">
-          <button class="qa-pill" onclick="sendMessage('Check my account balance')">💳 Check account balance</button>
-          <button class="qa-pill" onclick="sendMessage('Show recent transactions')">📋 Recent transactions</button>
-          <button class="qa-pill" onclick="sendMessage('How do I report fraud?')">🚨 Report fraud</button>
-          <button class="qa-pill" onclick="sendMessage('Find nearby ATM')">📍 Find nearby ATM</button>
+          <button class="qa-pill" onclick="sendMessage('Check my account balance')">💳 Balance</button>
+          <button class="qa-pill" onclick="sendMessage('Show recent transactions')">📋 Transactions</button>
+          <button class="qa-pill" onclick="startFraudReport()">🚨 Report Fraud</button>
+          <button class="qa-pill" onclick="startBlockCard()">🔒 Block Card</button>
+          <button class="qa-pill" onclick="sendMessage('Find nearby ATM')">📍 ATM Locator</button>
         </div>
 
         <div class="chat-input-area">
@@ -209,12 +219,7 @@ const RESPONSES = {
   💡 <strong>Electricity Bill</strong> — ₹1,240.00 <span style="color:#EF4444;">Debit</span> (Apr 9)<br><br>
   Need the full statement or details on any transaction?`,
 
-  fraud: `🚨 <strong>To report fraud immediately:</strong><br><br>
-  1. <strong>Hotline:</strong> Call +91 98765-43210 (24/7)<br>
-  2. <strong>In-app:</strong> Account → Security → Report Fraud<br>
-  3. <strong>Block card instantly:</strong> Type <em>"Block my card"</em><br>
-  4. <strong>Email:</strong> fraud@tusk-ai.com<br><br>
-  ⚡ Our AI fraud team responds within <strong>2 minutes</strong>. Your account is being flagged for review. Do you want me to temporarily freeze all outgoing transactions?`,
+  fraud: null, // handled by startFraudReport()
 
   atm: `📍 <strong>Nearest ATMs to Kalyanpur, Kanpur:</strong><br><br>
   🏧 <strong>TUSK Bank ATM</strong> — Civil Lines (0.3 km) ✅ Operational<br>
@@ -261,12 +266,7 @@ const RESPONSES = {
   💰 <strong>Savings</strong> — ₹5,000 (19%)<br><br>
   💡 <strong>AI Insight:</strong> Your shopping spend is 12% above your 3-month average. Consider setting a monthly budget cap. Want me to set up a spending alert?`,
 
-  block: `🔒 <strong>Card Block Request Received.</strong><br><br>
-  To confirm: I will block <strong>all cards</strong> linked to your account:<br>
-  💳 TUSK Visa Debit — **** **** **** 4521<br>
-  💳 TUSK RuPay — **** **** **** 8832<br><br>
-  ✅ Type <strong>"YES BLOCK"</strong> to confirm, or <strong>"Cancel"</strong> to abort.<br><br>
-  You can re-activate any card from: Account → Cards → Activate, or by calling +91 98765-43210.`,
+  block: null, // handled by startBlockCard()
 
   transfer: `💸 <strong>How to Transfer Money:</strong><br><br>
   <strong>UPI (Instant, 24/7):</strong><br>
@@ -340,17 +340,271 @@ const RESPONSES = {
   💡 Senior citizens get an additional <strong>0.50%</strong> on all FDs. Want to open an FD?`,
 };
 
+// ── Natural Language Intent Engine (local, no API) ───────────────────────────
+// Intent patterns: each has a list of trigger phrases / regex and a response.
+const INTENTS = [
+  {
+    name: 'greeting',
+    patterns: [/^(hi|hey|hello|heyy|hiii|helo|heya|good\s*(morning|afternoon|evening|night)|namaste|namaskar|sup|what'?s up|howdy)(\s|!|\.|,|$)/i,
+               /^(greetings|salutations|yo\b)/i],
+    responses: [
+      `👋 Hello! Welcome to <strong>TUSK AI Banking Assistant</strong>!<br><br>I'm here to help you 24/7 with your banking needs — account balances, transactions, fraud reporting, loans, UPI, and much more.<br><br>How can I assist you today? 😊`,
+      `Hi there! 👋 Great to see you! I'm your <strong>TUSK AI Banking Assistant</strong>.<br><br>Ask me anything about your account, payments, loans, or security — I'm always ready to help!`,
+      `Hello! 🐘 Welcome to TUSK AI. I'm your intelligent banking companion.<br><br>What can I help you with today? You can ask about balances, transactions, fraud, loans, ATMs, and more!`
+    ]
+  },
+  {
+    name: 'introduce',
+    patterns: [/introduce (your ?self|you)/i, /who are you/i, /what are you/i,
+               /tell me about your ?self/i, /about you/i, /your name/i,
+               /what('?s| is) your name/i, /what do you do/i, /what can you do/i,
+               /what (are|r) (your )?capabilities/i, /how can you help/i,
+               /what (are|r) you capable of/i],
+    responses: [
+      `🤖 I'm <strong>TUSK AI Banking Assistant</strong> — your 24/7 intelligent financial companion!<br><br>
+      Here's what I can do for you:<br>
+      💳 <strong>Account Services</strong> — Check balances, transactions, download statements<br>
+      🚨 <strong>Security</strong> — Report fraud, block/freeze cards, change password<br>
+      🏦 <strong>Loans & Rates</strong> — Home, car, personal, education loans & FD rates<br>
+      💸 <strong>Payments</strong> — UPI, NEFT, RTGS, auto-pay setup<br>
+      📊 <strong>Insights</strong> — Spending analysis & budget recommendations<br>
+      📍 <strong>Locator</strong> — Find nearest ATMs<br>
+      🛡️ <strong>Insurance & KYC</strong> — Policy info & document updates<br><br>
+      Built with RAGFlow + TUSK AI technology. How can I help you today?`
+    ]
+  },
+  {
+    name: 'thanks',
+    patterns: [/^(thank(s| you)|thx|ty|thnx|dhanyawad|shukriya)(\s|!|\.|$)/i,
+               /that('?s| was) (great|helpful|amazing|awesome|perfect|good)/i,
+               /great help/i, /you('?re| are) (great|awesome|helpful)/i],
+    responses: [
+      `😊 You're welcome! It's my pleasure to assist you. Is there anything else I can help you with?`,
+      `Happy to help! 🙌 Feel free to ask if you have any more questions about your account or banking services.`,
+      `Glad I could assist! 🐘 Don't hesitate to reach out anytime — I'm available 24/7!`
+    ]
+  },
+  {
+    name: 'goodbye',
+    patterns: [/^(bye|goodbye|good ?bye|see ya|see you|take care|later|cya|alvida|tata)(\s|!|\.|$)/i,
+               /have a (good|great|nice|wonderful) (day|night|evening|time)/i,
+               /that('?s| is) all/i, /nothing else/i, /no more questions/i],
+    responses: [
+      `👋 Goodbye! Have a great day! Remember, I'm available 24/7 whenever you need banking assistance. Stay safe! 🐘`,
+      `Take care! 😊 Come back anytime you need help with your banking. TUSK AI is always here for you!`,
+      `Bye! Have a wonderful day! 🌟 Your finances are in good hands with TUSK AI.`
+    ]
+  },
+  {
+    name: 'help',
+    patterns: [/^(help|help me|i need help|assist me|support)(\s|!|\?|$)/i,
+               /what can i (ask|do|say)/i, /how (do|does) (this|it) work/i,
+               /not sure what to ask/i, /confused/i, /options/i, /menu/i],
+    responses: [
+      `💡 <strong>Here's how I can help you:</strong><br><br>
+      💳 <strong>"Check my account balance"</strong> — View all account balances<br>
+      📋 <strong>"Show recent transactions"</strong> — Last 5 transactions<br>
+      🚨 <strong>"How do I report fraud?"</strong> — Fraud reporting steps<br>
+      📍 <strong>"Find nearby ATM"</strong> — Nearest ATMs to you<br>
+      🏦 <strong>"What are the loan interest rates?"</strong> — All loan rates<br>
+      🔐 <strong>"How to update my password?"</strong> — Security guide<br>
+      📊 <strong>"Analyze my spending"</strong> — Monthly spending insights<br><br>
+      Just type naturally — I understand conversational language! 😊`
+    ]
+  },
+  {
+    name: 'howAreYou',
+    patterns: [/how are you/i, /how('?s| is) it going/i, /how('?s| are) you doing/i,
+               /are you (ok|okay|fine|good|well)/i, /kya haal hai/i, /kaise ho/i],
+    responses: [
+      `I'm doing great, thank you for asking! 😊 Ready and available 24/7 to assist you with all your banking needs. How about you — how can I help you today?`,
+      `All systems running smoothly! 🚀 As your TUSK AI Banking Assistant, I'm always at 100%. What banking query can I help you with?`
+    ]
+  }
+];
+
+// ── Intent Matcher ─────────────────────────────────────────────────────────────
+function matchIntent(msg) {
+  for (const intent of INTENTS) {
+    for (const pattern of intent.patterns) {
+      if (pattern.test(msg.trim())) {
+        const r = intent.responses;
+        return r[Math.floor(Math.random() * r.length)];
+      }
+    }
+  }
+  return null;
+}
+
 // ── Keyword Matching Map ───────────────────────────────────────────────────────
+// ── Interactive: Report Fraud Flow ─────────────────────────────────────────────
+function startFraudReport() {
+  addMessage('🚨 Report Fraud', 'user');
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addActionMessage(
+      `🚨 <strong>Fraud Reporting &mdash; Quick Action</strong><br><br>
+      We're taking this seriously. Our AI security team will be notified immediately.<br><br>
+      <strong>Account:</strong> XXXX-XXXX-4521 &nbsp;|&nbsp; <strong>Last login:</strong> Kanpur, UP<br>
+      <strong>Date:</strong> ${new Date().toLocaleDateString('en-IN',{day:'2-digit',month:'short',year:'numeric'})}<br><br>
+      ⚠️ Do you want to <strong>freeze all outgoing transactions</strong> while we investigate?`,
+      [
+        { label: '🔒 Yes, Freeze Account', cls: 'danger',  action: 'confirmFraudFreeze' },
+        { label: '📞 Call Fraud Hotline',  cls: 'neutral', action: 'callFraudHotline'  },
+        { label: '❌ Cancel',              cls: 'neutral', action: 'cancelAction'      }
+      ]
+    );
+  }, 900);
+}
+
+window.confirmFraudFreeze = function() {
+  disableLastActionButtons();
+  addMessage('Yes, freeze my account', 'user');
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addMessage(
+      `🔒 <strong>Account Freeze Activated.</strong><br><br>
+      ✅ All outgoing transactions <strong>blocked immediately</strong>.<br>
+      ✅ Fraud case <strong>#FR-${Math.floor(Math.random()*900000+100000)}</strong> created.<br>
+      ✅ AI security team notified &mdash; response within <strong>2 minutes</strong>.<br>
+      ✅ SMS alert sent to your registered mobile.<br><br>
+      📧 <strong>fraud@tusk-ai.com</strong> &nbsp;|  📞 <strong>+91 98765-43210</strong> (24/7)<br><br>
+      To unfreeze: Account → Security → Unfreeze Account (requires OTP).`, 'bot'
+    );
+  }, 1200);
+};
+
+window.callFraudHotline = function() {
+  disableLastActionButtons();
+  addMessage('I want to call the fraud hotline', 'user');
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addMessage(
+      `📞 <strong>TUSK AI Fraud Hotline</strong><br><br>
+      🟢 <strong>+91 98765-43210</strong> &mdash; Available 24/7<br><br>
+      Mention your case reference: <strong>#FR-${Math.floor(Math.random()*900000+100000)}</strong><br>
+      📧 Email: <strong>fraud@tusk-ai.com</strong><br>
+      📱 In-app: Account → Security → Report Fraud<br><br>
+      Our team responds in <strong>under 2 minutes</strong>. Stay safe! 🛡️`, 'bot'
+    );
+  }, 800);
+};
+
+// ── Interactive: Block Card Flow ────────────────────────────────────────────────
+function startBlockCard() {
+  addMessage('🔒 Block my card', 'user');
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addActionMessage(
+      `🔒 <strong>Card Block Request</strong><br><br>
+      Cards linked to your account:<br><br>
+      💳 <strong>TUSK Visa Debit</strong> &mdash; **** **** **** 4521 &nbsp;<span style="color:#10B981;font-size:0.8rem">● Active</span><br>
+      💳 <strong>TUSK RuPay</strong> &mdash; **** **** **** 8832 &nbsp;<span style="color:#10B981;font-size:0.8rem">● Active</span><br><br>
+      ⚠️ This will <strong>immediately block</strong> the selected card(s). Which would you like to block?`,
+      [
+        { label: '🔴 Block All Cards',        cls: 'danger',  action: 'confirmBlockAll'   },
+        { label: '💳 Visa *4521 Only',         cls: 'neutral', action: 'confirmBlockVisa'  },
+        { label: '💳 RuPay *8832 Only',        cls: 'neutral', action: 'confirmBlockRupay' },
+        { label: '❌ Cancel',                   cls: 'success', action: 'cancelAction'       }
+      ]
+    );
+  }, 900);
+}
+
+window.confirmBlockAll = function() {
+  disableLastActionButtons();
+  addMessage('Block all my cards immediately', 'user');
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addMessage(
+      `🔴 <strong>All Cards Blocked Successfully.</strong><br><br>
+      ✅ TUSK Visa Debit *4521 &mdash; Blocked<br>
+      ✅ TUSK RuPay *8832 &mdash; Blocked<br><br>
+      🔔 SMS confirmation sent to your registered mobile.<br>
+      🕐 Effective: <strong>${new Date().toLocaleTimeString('en-IN',{hour:'2-digit',minute:'2-digit'})}</strong><br><br>
+      To reactivate: <strong>Account → Cards → Activate</strong> or call <strong>+91 98765-43210</strong>.`, 'bot'
+    );
+  }, 1200);
+};
+
+window.confirmBlockVisa = function() {
+  disableLastActionButtons();
+  addMessage('Block Visa *4521 only', 'user');
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addMessage(
+      `🔴 <strong>TUSK Visa Debit *4521 &mdash; Blocked.</strong><br><br>
+      ✅ Card ending 4521 is now <strong>blocked immediately</strong>.<br>
+      🟢 TUSK RuPay *8832 remains <strong>active</strong>.<br><br>
+      To reactivate: <strong>Account → Cards → Activate</strong> or call <strong>+91 98765-43210</strong>.`, 'bot'
+    );
+  }, 1000);
+};
+
+window.confirmBlockRupay = function() {
+  disableLastActionButtons();
+  addMessage('Block RuPay *8832 only', 'user');
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addMessage(
+      `🔴 <strong>TUSK RuPay *8832 &mdash; Blocked.</strong><br><br>
+      ✅ Card ending 8832 is now <strong>blocked immediately</strong>.<br>
+      🟢 TUSK Visa Debit *4521 remains <strong>active</strong>.<br><br>
+      To reactivate: <strong>Account → Cards → Activate</strong> or call <strong>+91 98765-43210</strong>.`, 'bot'
+    );
+  }, 1000);
+};
+
+window.cancelAction = function() {
+  disableLastActionButtons();
+  addMessage('Cancel', 'user');
+  showTyping();
+  setTimeout(() => {
+    removeTyping();
+    addMessage(`✅ Action cancelled. Your account and cards are unchanged. Is there anything else I can help you with? 😊`, 'bot');
+  }, 600);
+};
+
+// ── Utility: Render bot message with clickable action buttons ─────────────────
+function addActionMessage(html, buttons) {
+  const container = document.getElementById('chatMessages');
+  const div = document.createElement('div');
+  div.className = 'msg msg-bot';
+  div.dataset.hasActions = 'true';
+  const now = new Date().toLocaleTimeString([], {hour:'2-digit', minute:'2-digit'});
+  const btnHtml = buttons.map(b =>
+    `<button class="chat-action-btn ${b.cls}" onclick="window['${b.action}'] && window['${b.action}']()">${b.label}</button>`
+  ).join('');
+  div.innerHTML = `<div class="msg-bubble">${html}<div class="chat-action-btns">${btnHtml}</div></div><div class="msg-time">${now} · TUSK AI</div>`;
+  container.appendChild(div);
+  container.scrollTop = container.scrollHeight;
+}
+
+function disableLastActionButtons() {
+  const actionMsgs = document.querySelectorAll('[data-has-actions="true"]');
+  if (!actionMsgs.length) return;
+  actionMsgs[actionMsgs.length - 1].querySelectorAll('.chat-action-btn').forEach(btn => {
+    btn.disabled = true;
+  });
+}
+
 const KEYWORD_MAP = [
   { keys: ['balance', 'how much', 'account amount', 'funds'],           topic: 'balance'      },
   { keys: ['transaction', 'recent', 'history', 'statement', 'last 5'], topic: 'transaction'  },
-  { keys: ['fraud', 'report fraud', 'suspicious', 'scam', 'stolen', 'unauthorized'], topic: 'fraud' },
+  { keys: ['fraud', 'report fraud', 'suspicious', 'scam', 'stolen', 'unauthorized'], action: 'startFraudReport' },
   { keys: ['atm', 'cash machine', 'withdraw', 'nearest atm'],           topic: 'atm'          },
   { keys: ['bill pay', 'automatic', 'auto-pay', 'autopay', 'schedule payment'], topic: 'payment' },
   { keys: ['loan', 'interest rate', 'home loan', 'car loan', 'personal loan', 'education loan', 'emi rate', 'borrow'], topic: 'loan' },
   { keys: ['password', 'change password', 'update password', 'reset password', 'forgot password', 'login issue'], topic: 'password' },
   { keys: ['spend', 'spending', 'expense', 'analyse', 'analyze', 'pattern', 'budget'], topic: 'spending' },
-  { keys: ['block card', 'freeze', 'lock card', 'block my card'],        topic: 'block'        },
+  { keys: ['block card', 'freeze', 'lock card', 'block my card'],        action: 'startBlockCard' },
   { keys: ['transfer', 'send money', 'neft', 'rtgs', 'imps', 'fund transfer'], topic: 'transfer' },
   { keys: ['bank statement', 'download statement', 'e-statement'],        topic: 'statement'    },
   { keys: ['insurance', 'policy', 'cover', 'health plan', 'life cover'], topic: 'insurance'   },
@@ -372,10 +626,20 @@ const FALLBACK = `🤔 I didn't quite catch that. Here's what I can help you wit
 Try typing one of the above or pick a command from the left sidebar. 😊`;
 
 function getResponse(msg) {
+  // 1. Try natural language intent matching first
+  const intentReply = matchIntent(msg);
+  if (intentReply) return intentReply;
+
+  // 2. Fall back to banking keyword matching
   const lower = msg.toLowerCase();
-  for (const { keys, topic } of KEYWORD_MAP) {
-    if (keys.some(k => lower.includes(k))) {
-      return RESPONSES[topic];
+  for (const entry of KEYWORD_MAP) {
+    if (entry.keys.some(k => lower.includes(k))) {
+      if (entry.action) {
+        // Trigger the interactive flow function and signal no text reply needed
+        setTimeout(() => window[entry.action] && window[entry.action](), 0);
+        return '__action__';
+      }
+      return RESPONSES[entry.topic];
     }
   }
   return FALLBACK;
@@ -408,12 +672,18 @@ function removeTyping() {
 }
 
 function sendMessage(text) {
+  const response = getResponse(text);
+  // '__action__' means an interactive function will handle the full flow itself
+  if (response === '__action__') {
+    document.getElementById('chatInput').value = '';
+    return;
+  }
   addMessage(text, 'user');
   showTyping();
   const delay = 800 + Math.random() * 500;
   setTimeout(() => {
     removeTyping();
-    addMessage(getResponse(text), 'bot');
+    addMessage(response, 'bot');
   }, delay);
   document.getElementById('chatInput').value = '';
 }
